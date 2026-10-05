@@ -38,7 +38,7 @@ const HAND_DEFAULTS: HandColors = {
 };
 const THUMB_DEFAULTS: ThumbColors = { fill: "#FFD28B", shade: "#FAE0BD", stroke: "#FFFFFF", strokeWidth: 2 };
 
-export type HandDraggingToggleProps = {
+export type GrabToggleProps = {
   size?: keyof typeof SIZES;
   duration?: number;
   defaultChecked?: boolean;
@@ -110,7 +110,7 @@ function ThumbArt({ ref, colors, style, className }: ArtProps & { colors: ThumbC
   );
 }
 
-export function HandDraggingToggle({
+export function GrabToggle({
   size = "medium",
   duration = 1.5,
   defaultChecked = false,
@@ -123,7 +123,7 @@ export function HandDraggingToggle({
   handColors,
   thumbColors,
   className,
-}: HandDraggingToggleProps) {
+}: GrabToggleProps) {
   const [checked, setChecked] = useState(defaultChecked);
   const scale = SIZES[size] / HEIGHT;
   const busy = useRef(false);
