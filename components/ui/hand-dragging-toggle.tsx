@@ -19,19 +19,27 @@ const RIGHT_GRAB = 59;
 const LEFT_GRAB = -236;
 const EASE = [0.5, 0, 0.5, 1] as const;
 const SIZES = { small: 44, medium: 46, large: 48 } as const;
+const K = HAND_WIDTH / 37.2995;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-type HandColors = { fill: string; stroke: string; strokeWidth: number; cuff: string; gap: string };
-type ThumbColors = { fill: string; stroke: string; strokeWidth: number };
+type HandColors = { fill: string; stroke: string; strokeWidth: number; cuff: string; cuffShade: string; gap: string; gapEdge: string };
+type ThumbColors = { fill: string; shade: string; stroke: string; strokeWidth: number };
 
-const HAND_DEFAULTS: HandColors = { fill: "#FFD28B", stroke: "#FFFFFF", strokeWidth: 2, cuff: "#0089EB", gap: "#000000" };
-const THUMB_DEFAULTS: ThumbColors = { fill: "#FFD28B", stroke: "#FFFFFF", strokeWidth: 2 };
+const HAND_DEFAULTS: HandColors = {
+  fill: "#FFD28B",
+  stroke: "#FFFFFF",
+  strokeWidth: 2,
+  cuff: "#0089EB",
+  cuffShade: "#0068B2",
+  gap: "#000000",
+  gapEdge: "#3A3A3A",
+};
+const THUMB_DEFAULTS: ThumbColors = { fill: "#FFD28B", shade: "#FAE0BD", stroke: "#FFFFFF", strokeWidth: 2 };
 
 export type HandDraggingToggleProps = {
   size?: keyof typeof SIZES;
-  width?: number;
   duration?: number;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
@@ -48,22 +56,39 @@ export type HandDraggingToggleProps = {
 type ArtProps = { ref: Ref<SVGSVGElement>; style: CSSProperties; className: string };
 
 function HandArt({ ref, colors, style, className }: ArtProps & { colors: HandColors }) {
+  const filterId = `hdt-hand-${useId().replace(/:/g, "")}`;
   return (
     <svg ref={ref} width={HAND_WIDTH} height={116.5} viewBox="0 0 334 116.5" fill="none" style={style} className={className} aria-hidden>
+      <defs>
+        <filter id={filterId} x="0" y="0" width="334" height="116.5" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+          <feOffset dy={-0.5 * K} />
+          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0" />
+          <feBlend in2="shape" />
+        </filter>
+      </defs>
       <path
         d="M190.504 115.5H36.0042C36.0042 115.5 26.0041 114.011 26.0041 102.5C26.0041 91.5 36.0042 90 36.0042 90H81.5041C84.4398 90 84.5041 86.5 81.5042 86.5H23.5042C23.5042 86.5 14.0041 85.0019 14.0041 73C14.0041 59.5 23.5042 60 23.5042 60H83.0042C86.5041 59 85.5041 55.5 83.0042 55H12.0042C12.0042 55 1.25639 55.5 1.00417 42.5C0.751957 29.5 12.0042 29.5 12.0042 29.5H86.0042C89.5041 29.5 89.5041 24.5 86.0042 24.5H23.5042C23.5042 24.5 12.8379 23.4919 13.5042 11.5C14.0042 2.5 23.5042 1 23.5042 1H190.504V115.5Z"
         fill={colors.fill}
         stroke={colors.stroke}
         strokeWidth={colors.strokeWidth}
+        filter={`url(#${filterId})`}
       />
-      <path d="M206.714 12.6053H191V106.421H206.714V12.6053Z" fill={colors.gap} />
-      <path d="M206.714 115.5H334V0.5H206.714V12.6053V106.421V115.5Z" fill={colors.cuff} />
+      <g transform={`scale(${K})`}>
+        <path d="M22.2074 1.4078H23.0849V11.8847H22.2074V1.4078Z" fill={colors.gap} />
+        <path d="M21.33 1.4078V11.8847H22.2074V1.4078H21.33Z" fill={colors.gapEdge} />
+        <path d="M23.0849 12.5559C23.0849 12.5559 33.6116 12.5559 35.1116 11.5559C36.6116 10.5558 36.6116 0.0558941 36.6116 0.0558941L23.0849 0.0559399V1.4078V11.8847V12.5559Z" fill={colors.cuff} />
+        <path d="M23.0849 12.8986H37.2995V0.0559399L36.6116 0.0558941C36.6116 0.0558941 36.6116 10.5558 35.1116 11.5559C33.6116 12.5559 23.0849 12.5559 23.0849 12.5559V12.8986Z" fill={colors.cuffShade} />
+      </g>
     </svg>
   );
 }
 
 function ThumbArt({ ref, colors, style, className }: ArtProps & { colors: ThumbColors }) {
-  const filterId = `hdt-shadow-${useId().replace(/:/g, "")}`;
+  const filterId = `hdt-thumb-${useId().replace(/:/g, "")}`;
   return (
     <svg ref={ref} width={145.574} height={76.5} viewBox="0 0 145.574 76.5" fill="none" style={style} className={className} aria-hidden>
       <defs>
@@ -78,13 +103,15 @@ function ThumbArt({ ref, colors, style, className }: ArtProps & { colors: ThumbC
         strokeWidth={colors.strokeWidth}
         filter={`url(#${filterId})`}
       />
+      <g transform={`scale(${K})`}>
+        <path d="M3.63772 0.558376L0.678329 1.28426C0.675884 1.31768 0.673931 1.35273 0.672537 1.38924C0.665743 1.76291 0.769874 2.9838 2.47156 2.55838C4.47156 2.05838 3.63772 0.558376 3.63772 0.558376Z" fill={colors.shade} />
+      </g>
     </svg>
   );
 }
 
 export function HandDraggingToggle({
   size = "medium",
-  width,
   duration = 1.5,
   defaultChecked = false,
   onCheckedChange,
@@ -98,7 +125,7 @@ export function HandDraggingToggle({
   className,
 }: HandDraggingToggleProps) {
   const [checked, setChecked] = useState(defaultChecked);
-  const scale = width ? width / WIDTH : SIZES[size] / HEIGHT;
+  const scale = SIZES[size] / HEIGHT;
   const busy = useRef(false);
   const reduceMotion = useReducedMotion();
   const pill = useRef<HTMLButtonElement>(null);
