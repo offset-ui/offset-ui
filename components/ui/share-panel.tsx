@@ -1,11 +1,20 @@
 "use client";
 
+/**
+ * Dependencies this component expects from the host project:
+ * - Tailwind CSS (all styling is Tailwind utility classes plus a few inline styles for prop-driven values)
+ * - "motion" (the `motion/react` package) for the micro-interactions
+ * - cn() from "@/lib/utils" (clsx + tailwind-merge) — swap for your own classname merger if you don't have one
+ * - The SVGs in public/share-panel/*.svg (globe, copy-link, add-recipient, send-invite)
+ * Typography is inherited from the host page by default; pass `fontFamily` to override it.
+ * No Next.js-specific APIs are used, so this drops into any React project — the font is the
+ * only thing that previously assumed Next.js, and that's now just a prop.
+ */
+
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
-import { Inter } from "next/font/google";
 import { AnimatePresence, animate, motion, usePresence, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"] });
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CHIP_SPRING = { type: "spring", stiffness: 500, damping: 20, mass: 0.6 } as const;
 const LIST_SPRING = { type: "spring", stiffness: 380, damping: 34 } as const;
@@ -13,6 +22,17 @@ const SHAKE = { x: [0, -6, 6, -4, 4, -2, 0] };
 
 function springOr(reduceMotion: boolean | null, spring: object) {
   return reduceMotion ? { duration: 0 } : spring;
+}
+
+function useControllableState<T>(controlled: T | undefined, defaultValue: T, onChange?: (value: T) => void) {
+  const [uncontrolled, setUncontrolled] = useState(defaultValue);
+  const value = controlled !== undefined ? controlled : uncontrolled;
+  function setValue(next: T | ((prev: T) => T)) {
+    const resolved = typeof next === "function" ? (next as (prev: T) => T)(value) : next;
+    if (controlled === undefined) setUncontrolled(resolved);
+    onChange?.(resolved);
+  }
+  return [value, setValue] as const;
 }
 
 export type ShareRecipient = { id: string; name: string; email: string; avatarUrl?: string };
@@ -73,14 +93,18 @@ export type SharePanelProps = {
   title?: string;
   link?: string;
   onCopyLink?: (link: string) => void;
+  allowAnyone?: boolean;
   defaultAllowAnyone?: boolean;
   onAllowAnyoneChange?: (allow: boolean) => void;
+  recipients?: ShareRecipient[];
   defaultRecipients?: ShareRecipient[];
-  onInvite?: (recipient: ShareRecipient) => void;
+  onRecipientsChange?: (recipients: ShareRecipient[]) => void;
+  onInvite?: (recipient: ShareRecipient) => void | Promise<void>;
   onRemove?: (id: string) => void;
   resolveAvatar?: (recipient: ShareRecipient, index: number) => string | undefined;
   maxRecipients?: number;
   duration?: number;
+  fontFamily?: string;
   colors?: Partial<SharePanelColors>;
   sizes?: Partial<SharePanelSizes>;
   typography?: Partial<SharePanelTypography>;
@@ -274,24 +298,29 @@ export function SharePanel({
   title = "Share",
   link = "xyz.com/previewlink/note/453",
   onCopyLink,
+  allowAnyone: allowAnyoneProp,
   defaultAllowAnyone = true,
   onAllowAnyoneChange,
+  recipients: recipientsProp,
   defaultRecipients = [],
+  onRecipientsChange,
   onInvite,
   onRemove,
   resolveAvatar,
   maxRecipients = 5,
   duration = 0.3,
+  fontFamily,
   colors,
   sizes,
   typography,
   className,
 }: SharePanelProps) {
-  const [allowAnyone, setAllowAnyone] = useState(defaultAllowAnyone);
-  const [recipients, setRecipients] = useState(defaultRecipients);
+  const [allowAnyone, setAllowAnyone] = useControllableState(allowAnyoneProp, defaultAllowAnyone, onAllowAnyoneChange);
+  const [recipients, setRecipients] = useControllableState(recipientsProp, defaultRecipients, onRecipientsChange);
   const [draft, setDraft] = useState("");
-  const [error, setError] = useState<"invalid" | "limit" | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<"invalid" | "limit" | "duplicate" | "server" | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const nextId = useRef(0);
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const formRef = useRef<HTMLFormElement>(null);
@@ -309,12 +338,15 @@ export function SharePanel({
     shake.current?.stop();
   }, []);
 
-  function toggleAccess(next: boolean) {
-    setAllowAnyone(next);
-    onAllowAnyoneChange?.(next);
+  function rejectInvite(kind: "invalid" | "duplicate") {
+    setError(kind);
+    if (!reduceMotion) {
+      shake.current?.stop();
+      shake.current = animate(formRef.current!, SHAKE, { duration: 0.4, ease: "easeInOut" });
+    }
   }
 
-  function handleInvite(e: FormEvent) {
+  async function handleInvite(e: FormEvent) {
     e.preventDefault();
     if (recipients.length >= maxRecipients) {
       setError("limit");
@@ -322,19 +354,27 @@ export function SharePanel({
     }
     const email = draft.trim();
     if (!EMAIL_RE.test(email)) {
-      setError("invalid");
-      if (!reduceMotion) {
-        shake.current?.stop();
-        shake.current = animate(formRef.current!, SHAKE, { duration: 0.4, ease: "easeInOut" });
-      }
+      rejectInvite("invalid");
+      return;
+    }
+    const normalized = email.toLowerCase();
+    if (recipients.some((r) => r.email.toLowerCase() === normalized)) {
+      rejectInvite("duplicate");
       return;
     }
     const base: ShareRecipient = { id: `r${nextId.current++}`, name: nameFromEmail(email), email };
     const recipient: ShareRecipient = { ...base, avatarUrl: resolveAvatar?.(base, recipients.length) };
-    setRecipients((list) => [...list, recipient]);
-    onInvite?.(recipient);
-    setDraft("");
-    setError(null);
+    setSubmitting(true);
+    try {
+      await onInvite?.(recipient);
+      setRecipients((list) => [...list, recipient]);
+      setDraft("");
+      setError(null);
+    } catch {
+      setError("server");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function handleRemove(id: string) {
@@ -345,13 +385,13 @@ export function SharePanel({
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(link);
+      onCopyLink?.(link);
+      setCopyState("copied");
     } catch {
-      // clipboard unavailable (unsupported browser or no permission); the link text is still visible
+      setCopyState("error");
     }
-    onCopyLink?.(link);
-    setCopied(true);
     clearTimeout(copyTimer.current);
-    copyTimer.current = setTimeout(() => setCopied(false), 1500);
+    copyTimer.current = setTimeout(() => setCopyState("idle"), 1500);
   }
 
   const vars = {
@@ -376,8 +416,8 @@ export function SharePanel({
 
   return (
     <div
-      className={cn(inter.className, "w-full max-w-[373px] border bg-[color:var(--sp-bg)] [border-color:var(--sp-border)]", className)}
-      style={{ ...vars, borderRadius: s.radius, paddingInline: s.paddingX, paddingBlock: s.paddingY }}
+      className={cn("w-full max-w-[373px] border bg-[color:var(--sp-bg)] [border-color:var(--sp-border)]", className)}
+      style={{ ...vars, borderRadius: s.radius, paddingInline: s.paddingX, paddingBlock: s.paddingY, fontFamily }}
     >
       <h2 className="[color:var(--sp-text)]" style={{ fontSize: t.titleSize, fontWeight: t.titleWeight }}>
         {title}
@@ -399,7 +439,7 @@ export function SharePanel({
               Everyone with the link can access
             </p>
           </div>
-          <AccessSwitch checked={allowAnyone} onChange={toggleAccess} />
+          <AccessSwitch checked={allowAnyone} onChange={setAllowAnyone} />
         </div>
 
         <div className="flex items-center justify-between gap-2 rounded-[20px] bg-[color:var(--sp-link-bg)] px-2.5 py-[5px] [corner-shape:squircle]">
@@ -409,10 +449,15 @@ export function SharePanel({
           <button
             type="button"
             onClick={handleCopy}
-            aria-label="Copy link"
-            className="shrink-0 rounded outline-none [color:var(--sp-muted)] hover:[color:var(--sp-text)] focus-visible:ring-2 focus-visible:ring-[color:var(--sp-text)] focus-visible:ring-offset-2"
+            aria-label={copyState === "error" ? "Copy link (failed, try again)" : "Copy link"}
+            className={cn(
+              "shrink-0 rounded outline-none hover:[color:var(--sp-text)] focus-visible:ring-2 focus-visible:ring-[color:var(--sp-text)] focus-visible:ring-offset-2",
+              copyState === "error" ? "[color:var(--sp-danger)]" : "[color:var(--sp-muted)]",
+            )}
           >
-            {copied ? <CheckIcon className="size-5" /> : <CopyIcon className="size-5" />}
+            {copyState === "copied" && <CheckIcon className="size-5" />}
+            {copyState === "error" && <CautionIcon className="size-5" />}
+            {copyState === "idle" && <CopyIcon className="size-5" />}
           </button>
         </div>
       </div>
@@ -483,7 +528,8 @@ export function SharePanel({
                 </div>
                 <button
                   type="submit"
-                  className="flex shrink-0 items-center justify-center gap-0.5 bg-[color:var(--sp-btn-bg)] text-[color:var(--sp-btn-text)] outline-none [corner-shape:squircle] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[color:var(--sp-btn-bg)] focus-visible:ring-offset-2"
+                  disabled={submitting}
+                  className="flex shrink-0 items-center justify-center gap-0.5 bg-[color:var(--sp-btn-bg)] text-[color:var(--sp-btn-text)] outline-none [corner-shape:squircle] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[color:var(--sp-btn-bg)] focus-visible:ring-offset-2 disabled:opacity-60"
                   style={{
                     height: s.buttonHeight,
                     paddingLeft: s.buttonPaddingLeft,
@@ -494,7 +540,7 @@ export function SharePanel({
                   }}
                 >
                   <SendIcon className="size-4" />
-                  Invite
+                  {submitting ? "Inviting…" : "Invite"}
                 </button>
               </form>
               <AnimatePresence>
@@ -506,13 +552,18 @@ export function SharePanel({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={springOr(reduceMotion, { duration: 0.15 })}
-                    className={cn("flex items-center gap-0.5", error === "invalid" ? "[color:var(--sp-danger)]" : "[color:var(--sp-muted)]")}
+                    className={cn("flex items-center gap-0.5", error === "limit" ? "[color:var(--sp-muted)]" : "[color:var(--sp-danger)]")}
                     style={{ fontSize: t.captionSize, fontWeight: t.captionWeight }}
                   >
                     <CautionIcon className="size-4 shrink-0" />
-                    {error === "invalid"
-                      ? "Invalid email address. Please enter correctly"
-                      : `You can add up to ${maxRecipients} email invites at once.`}
+                    {
+                      {
+                        invalid: "Invalid email address. Please enter correctly",
+                        duplicate: "This email has already been invited.",
+                        limit: `You can add up to ${maxRecipients} email invites at once.`,
+                        server: "Something went wrong. Please try again.",
+                      }[error]
+                    }
                   </motion.p>
                 )}
               </AnimatePresence>
