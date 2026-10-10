@@ -205,6 +205,7 @@ function AccessSwitch({ checked, onChange }: { checked: boolean; onChange: (next
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label="Allow anyone with the link to access"
       onClick={() => onChange(!checked)}
       className="relative h-6 w-11 shrink-0 rounded-full bg-[color:var(--sp-switch-off)] outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--sp-switch-on)] focus-visible:ring-offset-2 motion-reduce:transition-none"
       style={{ background: checked ? "var(--sp-switch-on)" : undefined }}
@@ -222,14 +223,12 @@ function AccessSwitch({ checked, onChange }: { checked: boolean; onChange: (next
 function RecipientChip({
   recipient,
   size,
-  fontSize,
-  fontWeight,
+  textStyle,
   onRemove,
 }: {
   recipient: ShareRecipient;
   size: number;
-  fontSize: number;
-  fontWeight: number;
+  textStyle: CSSProperties;
   onRemove: () => void;
 }) {
   const reduceMotion = useReducedMotion();
@@ -254,7 +253,7 @@ function RecipientChip({
       onAnimationComplete={() => {
         if (!isPresent) safeToRemove();
       }}
-      style={{ fontSize, fontWeight, ...exitStyle }}
+      style={{ ...textStyle, ...exitStyle }}
       className="inline-flex items-center gap-0.5 rounded-full border border-[color:var(--sp-chip-border)] p-0.5 [color:var(--sp-muted)]"
     >
       <Avatar recipient={recipient} size={size} />
@@ -302,6 +301,8 @@ export function SharePanel({
   const c = { ...DEFAULT_COLORS, ...colors };
   const s = { ...DEFAULT_SIZES, ...sizes };
   const t = { ...DEFAULT_TYPOGRAPHY, ...typography };
+  const heading = { fontSize: t.headingSize, fontWeight: t.headingWeight };
+  const body = { fontSize: t.bodySize, fontWeight: t.bodyWeight };
 
   useEffect(() => () => {
     clearTimeout(copyTimer.current);
@@ -378,9 +379,9 @@ export function SharePanel({
       className={cn(inter.className, "w-full max-w-[373px] border bg-[color:var(--sp-bg)] [border-color:var(--sp-border)]", className)}
       style={{ ...vars, borderRadius: s.radius, paddingInline: s.paddingX, paddingBlock: s.paddingY }}
     >
-      <p className="[color:var(--sp-text)]" style={{ fontSize: t.titleSize, fontWeight: t.titleWeight }}>
+      <h2 className="[color:var(--sp-text)]" style={{ fontSize: t.titleSize, fontWeight: t.titleWeight }}>
         {title}
-      </p>
+      </h2>
 
       <div className="mt-4 flex flex-col gap-2">
         <div className="flex items-center gap-2.5 rounded-[20px] bg-[color:var(--sp-setting-bg)] p-2.5 [corner-shape:squircle]">
@@ -391,10 +392,10 @@ export function SharePanel({
             <GlobeIcon className="size-6" />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-[0px]">
-            <p className="[color:var(--sp-text)]" style={{ fontSize: t.headingSize, fontWeight: t.headingWeight }}>
+            <p className="[color:var(--sp-text)]" style={heading}>
               Anyone
             </p>
-            <p className="[color:var(--sp-muted)]" style={{ fontSize: t.bodySize, fontWeight: t.bodyWeight }}>
+            <p className="[color:var(--sp-muted)]" style={body}>
               Everyone with the link can access
             </p>
           </div>
@@ -402,7 +403,7 @@ export function SharePanel({
         </div>
 
         <div className="flex items-center justify-between gap-2 rounded-[20px] bg-[color:var(--sp-link-bg)] px-2.5 py-[5px] [corner-shape:squircle]">
-          <p className="truncate [color:var(--sp-muted)]" style={{ fontSize: t.bodySize, fontWeight: t.bodyWeight }}>
+          <p className="truncate [color:var(--sp-muted)]" style={body}>
             {link}
           </p>
           <button
@@ -451,8 +452,7 @@ export function SharePanel({
                         key={r.id}
                         recipient={r}
                         size={s.avatarChipSize}
-                        fontSize={t.bodySize}
-                        fontWeight={t.bodyWeight}
+                        textStyle={body}
                         onRemove={() => handleRemove(r.id)}
                       />
                     ))}
@@ -478,7 +478,7 @@ export function SharePanel({
                     autoComplete="off"
                     name="share-panel-invite-email"
                     className="min-w-[120px] flex-1 bg-transparent text-[color:var(--sp-muted)] outline-none placeholder:[color:var(--sp-muted)]"
-                    style={{ fontSize: t.bodySize, fontWeight: t.bodyWeight, height: Math.max(16, t.bodySize + 4), lineHeight: `${Math.max(16, t.bodySize + 4)}px` }}
+                    style={{ ...body, height: Math.max(16, t.bodySize + 4), lineHeight: `${Math.max(16, t.bodySize + 4)}px` }}
                   />
                 </div>
                 <button
@@ -540,18 +540,19 @@ export function SharePanel({
                       >
                         <Avatar recipient={r} size={s.avatarListSize} />
                         <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                          <p className="truncate [color:var(--sp-text)]" style={{ fontSize: t.headingSize, fontWeight: t.headingWeight }}>
+                          <p className="truncate [color:var(--sp-text)]" style={heading}>
                             {r.name}
                           </p>
-                          <p className="truncate [color:var(--sp-muted)]" style={{ fontSize: t.bodySize, fontWeight: t.bodyWeight }}>
+                          <p className="truncate [color:var(--sp-muted)]" style={body}>
                             {r.email}
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemove(r.id)}
+                          aria-label={`Remove ${r.name}`}
                           className="shrink-0 [color:var(--sp-danger)] outline-none hover:underline focus-visible:underline"
-                          style={{ fontSize: t.bodySize, fontWeight: t.bodyWeight }}
+                          style={body}
                         >
                           Remove
                         </button>
