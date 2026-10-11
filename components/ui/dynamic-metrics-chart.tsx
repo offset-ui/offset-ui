@@ -8,8 +8,8 @@
  * from the host page by default; pass `typography.fontFamily` to override it.
  */
 
-import { useEffect, useState, type CSSProperties } from "react";
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export type DynamicMetricsColors = {
@@ -24,6 +24,8 @@ export type DynamicMetricsColors = {
   increaseText: string;
   decreaseBg: string;
   decreaseText: string;
+  tooltipBg: string;
+  tooltipText: string;
 };
 
 export type DynamicMetricsSizes = {
@@ -31,6 +33,7 @@ export type DynamicMetricsSizes = {
   barRadius: number;
   pillRadius: number;
   badgeRadius: number;
+  tooltipRadius: number;
   plotHeight: number;
   maxBars: number;
   /** Override the data-driven bar width (see barWidthFor) with a fixed pixel value. */
@@ -47,6 +50,9 @@ export type DynamicMetricsTypography = {
   axisSize: number;
   pillSize: number;
   badgeSize: number;
+  badgeWeight: number;
+  tooltipSize: number;
+  tooltipWeight: number;
 };
 
 export type MetricsFrame = {
@@ -57,7 +63,11 @@ export type MetricsFrame = {
   /** Percent change; its sign drives the up/green or down/red badge. */
   salesChange: number;
   unitsChange: number;
-  /** Raw bar values; heights are normalised against the frame's own max. */
+  /**
+   * Relative shape of sales over the period. It's resampled to the rendered bar
+   * count (one bar per unit, capped at maxBars), so the number of values here is
+   * only the silhouette — the actual bar count is driven by `units`.
+   */
   bars: number[];
   /** X-axis labels, rendered independently of bar count. */
   ticks: string[];
@@ -90,13 +100,16 @@ const COLORS: DynamicMetricsColors = {
   increaseText: "#276c07",
   decreaseBg: "#ffe0e0",
   decreaseText: "#6c0707",
+  tooltipBg: "#121212",
+  tooltipText: "#ffffff",
 };
 
 const SIZES: DynamicMetricsSizes = {
-  radius: 24,
-  barRadius: 4,
+  radius: 48,
+  barRadius: 2,
   pillRadius: 20,
-  badgeRadius: 6,
+  badgeRadius: 12,
+  tooltipRadius: 14,
   plotHeight: 126,
   maxBars: 25,
 };
@@ -107,13 +120,19 @@ const TYPO: DynamicMetricsTypography = {
   valueSize: 24,
   valueWeight: 500,
   labelSize: 16,
-  axisSize: 14,
+  axisSize: 12,
   pillSize: 16,
   badgeSize: 10,
+  badgeWeight: 500,
+  tooltipSize: 10,
+  tooltipWeight: 500,
 };
 
 /** iOS-style continuous corners; applied only to border-less fills (bars, badges). */
 const SQUIRCLE = { cornerShape: "squircle" } as CSSProperties;
+
+/** Quick spring that squeezes the active pill as it slides between options. */
+const PILL_SPRING = { type: "spring", stiffness: 800, damping: 56, mass: 0.8 } as const;
 
 const DEMO_FRAMES: MetricsFrame[] = [
   {
@@ -148,19 +167,37 @@ const DEMO_FRAMES: MetricsFrame[] = [
   },
 ];
 
-/** Dynamic bar width from total volume: <15 → 18px, 15–30 → 30px, >30 → thin 6px. */
-function barWidthFor(units: number, override?: number) {
+/** Bar width adapts to the rendered bar count so bars fit without overflowing. */
+function barWidthFor(count: number, override?: number) {
   if (override !== undefined) return override;
-  if (units < 15) return 18;
-  if (units <= 30) return 30;
+  if (count <= 12) return 18;
+  if (count <= 18) return 12;
   return 6;
 }
 
-/** Hard ceiling on bars: evenly sample down to `max` instead of dropping the tail. */
-function capBars(values: number[], max: number) {
-  if (values.length <= max) return values;
-  const step = (values.length - 1) / (max - 1);
-  return Array.from({ length: max }, (_, i) => values[Math.round(i * step)]);
+/** Resample a shape (up or down) to exactly `n` points via linear interpolation. */
+function resample(values: number[], n: number): number[] {
+  if (n <= 0 || values.length === 0) return [];
+  if (values.length === n) return values.slice();
+  if (n === 1) return [values.reduce((a, b) => a + b, 0) / values.length];
+  if (values.length === 1) return Array(n).fill(values[0]);
+  return Array.from({ length: n }, (_, i) => {
+    const pos = (i * (values.length - 1)) / (n - 1);
+    const lo = Math.floor(pos);
+    const hi = Math.min(lo + 1, values.length - 1);
+    return values[lo] + (values[hi] - values[lo]) * (pos - lo);
+  });
+}
+
+/** Split an integer `total` across `weights` so the whole-number parts sum exactly to `total`. */
+function allocateIntegers(weights: number[], total: number) {
+  const sum = weights.reduce((a, b) => a + b, 0) || 1;
+  const raw = weights.map((w) => (w / sum) * total);
+  const result = raw.map(Math.floor);
+  let left = total - result.reduce((a, b) => a + b, 0);
+  const byFraction = raw.map((r, i) => [i, r - Math.floor(r)] as const).sort((a, b) => b[1] - a[1]);
+  for (let k = 0; left > 0 && k < byFraction.length; k++, left--) result[byFraction[k][0]]++;
+  return result;
 }
 
 function useControllableState<T>(controlled: T | undefined, defaultValue: T, onChange?: (value: T) => void) {
@@ -181,7 +218,7 @@ function TrendTriangle({ up }: { up: boolean }) {
   );
 }
 
-function ChangeBadge({ value, size, radius }: { value: number; size: number; radius: number }) {
+function ChangeBadge({ value, size, weight, radius }: { value: number; size: number; weight: number; radius: number }) {
   const up = value >= 0;
   return (
     <span
@@ -191,6 +228,7 @@ function ChangeBadge({ value, size, radius }: { value: number; size: number; rad
         backgroundColor: up ? "var(--dmc-inc-bg)" : "var(--dmc-dec-bg)",
         color: up ? "var(--dmc-inc-text)" : "var(--dmc-dec-text)",
         fontSize: size,
+        fontWeight: weight,
         ...SQUIRCLE,
       }}
     >
@@ -249,7 +287,7 @@ function Metric({
         >
           {value}
         </p>
-        <ChangeBadge value={change} size={typo.badgeSize} radius={badgeRadius} />
+        <ChangeBadge value={change} size={typo.badgeSize} weight={typo.badgeWeight} radius={badgeRadius} />
       </div>
     </div>
   );
@@ -277,9 +315,40 @@ export function DynamicMetricsChart({
   const [active, setActive] = useControllableState(timeframe, defaultTimeframe ?? frames[0].id, onTimeframeChange);
   const frame = frames.find((f) => f.id === active) ?? frames[0];
 
-  const bars = capBars(frame.bars, s.maxBars);
-  const max = Math.max(...bars, 1);
-  const barWidth = barWidthFor(frame.units, s.barWidth);
+  // Single sliding/squeezing pill: measure the active button and tween a lone indicator to it.
+  const groupRef = useRef<HTMLDivElement>(null);
+  const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [pill, setPill] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const measurePill = useCallback(() => {
+    const el = btnRefs.current[active];
+    if (el) setPill({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+  }, [active]);
+  useLayoutEffect(measurePill, [measurePill, t.pillSize, frames]);
+  useEffect(() => {
+    document.fonts?.ready.then(measurePill);
+  }, [measurePill]);
+
+  // One bar per unit, capped at maxBars. The sales shape is resampled to that count,
+  // then Sales/Units are split across the bars so everything stays consistent:
+  // height tracks each bar's $ amount, amounts sum to Sales, units sum to Units, and a
+  // bar with no sales ($0) holds 0 units (zero height) — never money with zero units.
+  const totalUnits = Math.max(0, Math.round(frame.units));
+  const barCount = Math.min(totalUnits, s.maxBars);
+  const shape = resample(frame.bars, barCount);
+  const centShares = allocateIntegers(shape, Math.round(frame.sales * 100));
+  const extraUnits = allocateIntegers(shape, totalUnits - barCount); // spread the surplus over 1-per-bar
+  const barData = shape.map((_, i) => {
+    const salesAmount = centShares[i] / 100;
+    return { sales: salesAmount, units: salesAmount > 0 ? 1 + extraUnits[i] : 0 };
+  });
+  const maxSales = Math.max(...barData.map((b) => b.sales), Number.EPSILON);
+  const barWidth = barWidthFor(barCount, s.barWidth);
+
+  const [hovered, setHovered] = useState<number | null>(null);
+  function selectTimeframe(id: string) {
+    setHovered(null); // drop any stale hover when the bars change
+    setActive(id);
+  }
 
   const vars = {
     "--dmc-surface": c.surface,
@@ -293,6 +362,8 @@ export function DynamicMetricsChart({
     "--dmc-inc-text": c.increaseText,
     "--dmc-dec-bg": c.decreaseBg,
     "--dmc-dec-text": c.decreaseText,
+    "--dmc-tip-bg": c.tooltipBg,
+    "--dmc-tip-text": c.tooltipText,
   } as CSSProperties;
 
   return (
@@ -304,23 +375,34 @@ export function DynamicMetricsChart({
         <h2 className="[color:var(--dmc-text)]" style={{ fontSize: t.headingSize, fontWeight: t.headingWeight }}>
           {title}
         </h2>
-        <div role="group" aria-label="Select time range" className="flex gap-2.5">
+        <div ref={groupRef} role="group" aria-label="Select time range" className="relative flex gap-2.5">
+          {pill && (
+            <motion.div
+              aria-hidden
+              initial={false}
+              animate={{ x: pill.x, y: pill.y, width: pill.w, height: pill.h }}
+              transition={reduceMotion ? { duration: 0 } : PILL_SPRING}
+              className="absolute left-0 top-0"
+              style={{ borderRadius: s.pillRadius, backgroundColor: "var(--dmc-pill-active)", ...SQUIRCLE }}
+            />
+          )}
           {frames.map((f) => {
             const selected = f.id === active;
             return (
               <button
                 key={f.id}
+                ref={(el) => {
+                  btnRefs.current[f.id] = el;
+                }}
                 type="button"
                 aria-pressed={selected}
-                onClick={() => setActive(f.id)}
-                className="flex items-center justify-center px-2 py-1.5 transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dmc-muted)]"
+                onClick={() => selectTimeframe(f.id)}
+                className="relative flex items-center justify-center px-2 py-1.5 outline-none transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dmc-muted)]"
                 style={{
                   borderRadius: s.pillRadius,
-                  backgroundColor: selected ? "var(--dmc-pill-active)" : "transparent",
                   color: selected ? "var(--dmc-text)" : "var(--dmc-muted)",
                   fontSize: t.pillSize,
                   fontWeight: 500,
-                  ...SQUIRCLE,
                 }}
               >
                 {f.label}
@@ -350,27 +432,68 @@ export function DynamicMetricsChart({
 
       <div className="flex w-full flex-col gap-2.5 pt-6">
         <div
-          role="img"
+          role="group"
           aria-label={`${frame.label}: sales ${formatSales(frame.sales)}, ${formatUnits(frame.units)} units`}
-          className="w-full"
+          className="relative w-full"
           style={{ height: s.plotHeight }}
+          onMouseLeave={() => setHovered(null)}
         >
           <motion.div key={active} className="flex h-full w-full items-end">
-            {bars.map((value, i) => {
-              const height = (value / max) * s.plotHeight;
+            {barData.map((bar, i) => {
+              const height = (bar.sales / maxSales) * s.plotHeight;
+              const faded = hovered !== null && hovered !== i;
+              const unitWord = bar.units === 1 ? "Unit" : "Units";
               return (
-                <div key={i} className="flex flex-1 items-end justify-center">
+                <div
+                  key={i}
+                  role="img"
+                  aria-label={`${formatSales(bar.sales)}, ${formatUnits(bar.units)} ${unitWord}`}
+                  tabIndex={0}
+                  onMouseEnter={() => setHovered(i)}
+                  onFocus={() => setHovered(i)}
+                  onBlur={() => setHovered(null)}
+                  className="flex flex-1 items-end justify-center rounded-md outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dmc-muted)]"
+                >
                   <motion.div
                     aria-hidden
                     initial={reduceMotion ? false : { height: 0 }}
-                    animate={{ height }}
-                    transition={{ duration, ease: "easeOut", delay: reduceMotion ? 0 : Math.min(i * 0.015, 0.3) }}
+                    animate={{ height, opacity: faded ? 0.25 : 1 }}
+                    transition={{
+                      height: { duration, ease: "easeOut", delay: reduceMotion ? 0 : Math.min(i * 0.015, 0.3) },
+                      opacity: { duration: reduceMotion ? 0 : 0.2 },
+                    }}
                     style={{ width: barWidth, borderRadius: s.barRadius, backgroundColor: "var(--dmc-bar)", ...SQUIRCLE }}
                   />
                 </div>
               );
             })}
           </motion.div>
+
+          {/* One shared tooltip that slides between bars (no per-bar remount, no width jump). */}
+          <AnimatePresence>
+            {hovered !== null && barData[hovered] && (
+              <motion.div
+                key="tooltip"
+                aria-hidden
+                initial={{ opacity: 0, left: `${((hovered + 0.5) / barData.length) * 100}%`, bottom: (barData[hovered].sales / maxSales) * s.plotHeight + 13 }}
+                animate={{ opacity: 1, left: `${((hovered + 0.5) / barData.length) * 100}%`, bottom: (barData[hovered].sales / maxSales) * s.plotHeight + 13 }}
+                exit={{ opacity: 0 }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { left: { type: "spring", stiffness: 500, damping: 36 }, bottom: { type: "spring", stiffness: 500, damping: 36 }, opacity: { duration: 0.15 } }
+                }
+                className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap px-2 py-1.5 text-center [background:var(--dmc-tip-bg)] [color:var(--dmc-tip-text)]"
+                style={{ borderRadius: s.tooltipRadius, fontSize: t.tooltipSize, fontWeight: t.tooltipWeight, ...SQUIRCLE }}
+              >
+                {`${formatSales(barData[hovered].sales).replace(/\.\d+/, "")} / ${formatUnits(barData[hovered].units)}${barData[hovered].units === 1 ? "Unit" : "Units"}`}
+                <span
+                  className="absolute left-1/2 top-full -translate-x-1/2"
+                  style={{ width: 0, height: 0, borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "9px solid var(--dmc-tip-bg)" }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="flex w-full items-center border-t border-solid [border-color:var(--dmc-grid)]">
