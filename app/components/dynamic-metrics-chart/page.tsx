@@ -17,7 +17,7 @@ const emptyFrames: MetricsFrame[] = [
 export default function DynamicMetricsChartDemo() {
   const font = { fontFamily: inter.style.fontFamily };
   return (
-    <main className="flex min-h-screen flex-col items-center gap-10 bg-white p-5">
+    <main className="flex min-h-screen flex-wrap items-start justify-center gap-10 bg-white p-5">
       {/* Data state — reads every value from the component's own defaults */}
       <DynamicMetricsChart typography={font} />
 
