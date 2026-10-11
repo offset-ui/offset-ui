@@ -80,10 +80,10 @@ export type DynamicMetricsChartProps = {
 
 const COLORS: DynamicMetricsColors = {
   surface: "#ffffff",
-  border: "#f8f8f8",
+  border: "#ebebeb",
   text: "#121212",
   muted: "#707070",
-  pillActive: "#f8f8f8",
+  pillActive: "#f4f4f4",
   bar: "#d2ebff",
   grid: "#ebebeb",
   increaseBg: "#e0ffe2",
@@ -93,9 +93,9 @@ const COLORS: DynamicMetricsColors = {
 };
 
 const SIZES: DynamicMetricsSizes = {
-  radius: 20,
+  radius: 24,
   barRadius: 4,
-  pillRadius: 10,
+  pillRadius: 20,
   badgeRadius: 6,
   plotHeight: 126,
   maxBars: 25,
