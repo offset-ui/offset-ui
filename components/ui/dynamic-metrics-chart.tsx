@@ -8,7 +8,7 @@
  * from the host page by default; pass `typography.fontFamily` to override it.
  */
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +26,9 @@ export type DynamicMetricsColors = {
   decreaseText: string;
   tooltipBg: string;
   tooltipText: string;
+  emptyPanel: string;
+  refreshBg: string;
+  refreshText: string;
 };
 
 export type DynamicMetricsSizes = {
@@ -82,6 +85,11 @@ export type DynamicMetricsChartProps = {
   formatSales?: (value: number) => string;
   formatUnits?: (value: number) => string;
   duration?: number;
+  /** Shown in the chart area when the active frame has no data (units ≤ 0). */
+  emptyMessage?: string;
+  refreshLabel?: string;
+  /** Called when the empty-state Refresh button is pressed. */
+  onRefresh?: () => void;
   colors?: Partial<DynamicMetricsColors>;
   sizes?: Partial<DynamicMetricsSizes>;
   typography?: Partial<DynamicMetricsTypography>;
@@ -102,6 +110,9 @@ const COLORS: DynamicMetricsColors = {
   decreaseText: "#6c0707",
   tooltipBg: "#121212",
   tooltipText: "#ffffff",
+  emptyPanel: "#fbfdff",
+  refreshBg: "#E9F5FF",
+  refreshText: "#315b7a",
 };
 
 const SIZES: DynamicMetricsSizes = {
@@ -133,6 +144,9 @@ const SQUIRCLE = { cornerShape: "squircle" } as CSSProperties;
 
 /** Quick spring that squeezes the active pill as it slides between options. */
 const PILL_SPRING = { type: "spring", stiffness: 800, damping: 56, mass: 0.8 } as const;
+
+/** Softer spring that glides the shared tooltip between bars. */
+const TIP_SPRING = { type: "spring", stiffness: 500, damping: 36 } as const;
 
 const DEMO_FRAMES: MetricsFrame[] = [
   {
@@ -218,6 +232,19 @@ function TrendTriangle({ up }: { up: boolean }) {
   );
 }
 
+function RefreshIcon() {
+  return (
+    <svg aria-hidden width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+      <path
+        d="M2 8C2 6.4087 2.63214 4.88258 3.75736 3.75736C4.88258 2.63214 6.4087 2 8 2C9.67737 2.00631 11.2874 2.66082 12.4933 3.82667L14 5.33333M10.6667 5.33333H14V2M14 8C14 9.5913 13.3679 11.1174 12.2426 12.2426C11.1174 13.3679 9.5913 14 8 14C6.32263 13.9937 4.71265 13.3392 3.50667 12.1733L2 10.6667M2 14V10.6667H5.33333"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function ChangeBadge({ value, size, weight, radius }: { value: number; size: number; weight: number; radius: number }) {
   const up = value >= 0;
   return (
@@ -268,12 +295,14 @@ function Metric({
   change,
   typo,
   badgeRadius,
+  empty,
 }: {
   label: string;
   value: React.ReactNode;
   change: number;
   typo: DynamicMetricsTypography;
   badgeRadius: number;
+  empty?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -282,12 +311,12 @@ function Metric({
       </p>
       <div className="flex items-center gap-2.5">
         <p
-          className="whitespace-nowrap tabular-nums [color:var(--dmc-text)]"
-          style={{ fontSize: typo.valueSize, fontWeight: typo.valueWeight }}
+          className="whitespace-nowrap tabular-nums"
+          style={{ fontSize: typo.valueSize, fontWeight: typo.valueWeight, color: empty ? "var(--dmc-muted)" : "var(--dmc-text)" }}
         >
-          {value}
+          {empty ? "—" : value}
         </p>
-        <ChangeBadge value={change} size={typo.badgeSize} weight={typo.badgeWeight} radius={badgeRadius} />
+        {!empty && <ChangeBadge value={change} size={typo.badgeSize} weight={typo.badgeWeight} radius={badgeRadius} />}
       </div>
     </div>
   );
@@ -302,6 +331,9 @@ export function DynamicMetricsChart({
   formatSales = (v) => `$${v.toFixed(2)}`,
   formatUnits = (v) => Math.round(v).toString(),
   duration = 0.5,
+  emptyMessage = "Not enough parameters or metrics at this moment.",
+  refreshLabel = "Refresh",
+  onRefresh,
   colors,
   sizes,
   typography,
@@ -332,23 +364,40 @@ export function DynamicMetricsChart({
   // then Sales/Units are split across the bars so everything stays consistent:
   // height tracks each bar's $ amount, amounts sum to Sales, units sum to Units, and a
   // bar with no sales ($0) holds 0 units (zero height) — never money with zero units.
-  const totalUnits = Math.max(0, Math.round(frame.units));
-  const barCount = Math.min(totalUnits, s.maxBars);
-  const shape = resample(frame.bars, barCount);
-  const centShares = allocateIntegers(shape, Math.round(frame.sales * 100));
-  const extraUnits = allocateIntegers(shape, totalUnits - barCount); // spread the surplus over 1-per-bar
-  const barData = shape.map((_, i) => {
-    const salesAmount = centShares[i] / 100;
-    return { sales: salesAmount, units: salesAmount > 0 ? 1 + extraUnits[i] : 0 };
-  });
-  const maxSales = Math.max(...barData.map((b) => b.sales), Number.EPSILON);
-  const barWidth = barWidthFor(barCount, s.barWidth);
+  // Memoised so hovering (which re-renders) doesn't redo the resample/allocation.
+  const { barData, maxSales, barWidth } = useMemo(() => {
+    const totalUnits = Math.max(0, Math.round(frame.units));
+    const barCount = Math.min(totalUnits, s.maxBars);
+    const shape = resample(frame.bars, barCount);
+    const centShares = allocateIntegers(shape, Math.round(frame.sales * 100));
+    const extraUnits = allocateIntegers(shape, totalUnits - barCount); // spread the surplus over 1-per-bar
+    const data = shape.map((_, i) => {
+      const salesAmount = centShares[i] / 100;
+      return { sales: salesAmount, units: salesAmount > 0 ? 1 + extraUnits[i] : 0 };
+    });
+    return {
+      barData: data,
+      maxSales: Math.max(...data.map((b) => b.sales), Number.EPSILON),
+      barWidth: barWidthFor(barCount, s.barWidth),
+    };
+  }, [frame, s.maxBars, s.barWidth]);
+
+  const isEmpty = barData.length === 0; // no units/data for this frame → show the empty state
 
   const [hovered, setHovered] = useState<number | null>(null);
   function selectTimeframe(id: string) {
     setHovered(null); // drop any stale hover when the bars change
     setActive(id);
   }
+
+  const hoveredBar = hovered !== null ? barData[hovered] : undefined;
+  const tip = hoveredBar
+    ? {
+        left: `${((hovered! + 0.5) / barData.length) * 100}%`,
+        bottom: (hoveredBar.sales / maxSales) * s.plotHeight + 13,
+        text: `${formatSales(hoveredBar.sales).replace(/\.\d+/, "")} / ${formatUnits(hoveredBar.units)}${hoveredBar.units === 1 ? "Unit" : "Units"}`,
+      }
+    : null;
 
   const vars = {
     "--dmc-surface": c.surface,
@@ -364,6 +413,9 @@ export function DynamicMetricsChart({
     "--dmc-dec-text": c.decreaseText,
     "--dmc-tip-bg": c.tooltipBg,
     "--dmc-tip-text": c.tooltipText,
+    "--dmc-empty-panel": c.emptyPanel,
+    "--dmc-refresh-bg": c.refreshBg,
+    "--dmc-refresh-text": c.refreshText,
   } as CSSProperties;
 
   return (
@@ -419,6 +471,7 @@ export function DynamicMetricsChart({
           change={frame.salesChange}
           typo={t}
           badgeRadius={s.badgeRadius}
+          empty={isEmpty}
         />
         <div className="h-12 w-px shrink-0 [background:var(--dmc-grid)]" />
         <Metric
@@ -427,18 +480,39 @@ export function DynamicMetricsChart({
           change={frame.unitsChange}
           typo={t}
           badgeRadius={s.badgeRadius}
+          empty={isEmpty}
         />
       </div>
 
       <div className="flex w-full flex-col gap-2.5 pt-6">
-        <div
-          role="group"
-          aria-label={`${frame.label}: sales ${formatSales(frame.sales)}, ${formatUnits(frame.units)} units`}
-          className="relative w-full"
-          style={{ height: s.plotHeight }}
-          onMouseLeave={() => setHovered(null)}
-        >
-          <motion.div key={active} className="flex h-full w-full items-end">
+        {isEmpty ? (
+          <div
+            role="status"
+            className="flex w-full flex-col items-center justify-center gap-4 overflow-hidden px-4 text-center [background:var(--dmc-empty-panel)]"
+            style={{ minHeight: s.plotHeight, borderRadius: 8, ...SQUIRCLE }}
+          >
+            <p className="[color:var(--dmc-muted)]" style={{ fontSize: t.labelSize, lineHeight: 1.5, maxWidth: 370 }}>
+              {emptyMessage}
+            </p>
+            <button
+              type="button"
+              onClick={onRefresh}
+              className="inline-flex items-center gap-2 px-2 py-2 outline-none transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dmc-muted)] [background:var(--dmc-refresh-bg)] [color:var(--dmc-refresh-text)]"
+              style={{ borderRadius: 14, fontSize: 12, fontWeight: 500, ...SQUIRCLE }}
+            >
+              <RefreshIcon />
+              {refreshLabel}
+            </button>
+          </div>
+        ) : (
+          <div
+            role="group"
+            aria-label={`${frame.label}: sales ${formatSales(frame.sales)}, ${formatUnits(frame.units)} units`}
+            className="relative w-full"
+            style={{ height: s.plotHeight }}
+            onMouseLeave={() => setHovered(null)}
+          >
+            <motion.div key={active} className="flex h-full w-full items-end">
             {barData.map((bar, i) => {
               const height = (bar.sales / maxSales) * s.plotHeight;
               const faded = hovered !== null && hovered !== i;
@@ -471,22 +545,22 @@ export function DynamicMetricsChart({
 
           {/* One shared tooltip that slides between bars (no per-bar remount, no width jump). */}
           <AnimatePresence>
-            {hovered !== null && barData[hovered] && (
+            {tip && (
               <motion.div
                 key="tooltip"
                 aria-hidden
-                initial={{ opacity: 0, left: `${((hovered + 0.5) / barData.length) * 100}%`, bottom: (barData[hovered].sales / maxSales) * s.plotHeight + 13 }}
-                animate={{ opacity: 1, left: `${((hovered + 0.5) / barData.length) * 100}%`, bottom: (barData[hovered].sales / maxSales) * s.plotHeight + 13 }}
+                initial={{ opacity: 0, left: tip.left, bottom: tip.bottom }}
+                animate={{ opacity: 1, left: tip.left, bottom: tip.bottom }}
                 exit={{ opacity: 0 }}
                 transition={
                   reduceMotion
                     ? { duration: 0 }
-                    : { left: { type: "spring", stiffness: 500, damping: 36 }, bottom: { type: "spring", stiffness: 500, damping: 36 }, opacity: { duration: 0.15 } }
+                    : { left: TIP_SPRING, bottom: TIP_SPRING, opacity: { duration: 0.15 } }
                 }
                 className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap px-2 py-1.5 text-center [background:var(--dmc-tip-bg)] [color:var(--dmc-tip-text)]"
                 style={{ borderRadius: s.tooltipRadius, fontSize: t.tooltipSize, fontWeight: t.tooltipWeight, ...SQUIRCLE }}
               >
-                {`${formatSales(barData[hovered].sales).replace(/\.\d+/, "")} / ${formatUnits(barData[hovered].units)}${barData[hovered].units === 1 ? "Unit" : "Units"}`}
+                {tip.text}
                 <span
                   className="absolute left-1/2 top-full -translate-x-1/2"
                   style={{ width: 0, height: 0, borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "9px solid var(--dmc-tip-bg)" }}
@@ -494,7 +568,8 @@ export function DynamicMetricsChart({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+          </div>
+        )}
 
         <div className="flex w-full items-center border-t border-solid [border-color:var(--dmc-grid)]">
           {frame.ticks.map((tick, i) => (

@@ -1,16 +1,28 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import { DynamicMetricsChart } from "@/components/ui/dynamic-metrics-chart";
+import { DynamicMetricsChart, type MetricsFrame } from "@/components/ui/dynamic-metrics-chart";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500"] });
 
-// Edit everything (data, colours, sizes, typography) in the component's
-// DEMO_FRAMES / COLORS / SIZES / TYPO defaults — this page only supplies the font.
+// "No data" showcase: frames with zero units render the empty state automatically.
+// With real data you just pass live frames — this state appears on its own whenever a
+// period has no data, and the Refresh button fires onRefresh so you can refetch.
+const emptyFrames: MetricsFrame[] = [
+  { id: "today", label: "Today", sales: 0, units: 0, salesChange: 0, unitsChange: 0, bars: [], ticks: ["00:00", "06:00", "12:00", "18:00", "24:00"] },
+  { id: "7d", label: "7D", sales: 0, units: 0, salesChange: 0, unitsChange: 0, bars: [], ticks: ["02 Oct", "03 Oct", "04 Oct", "05 Oct", "06 Oct", "07 Oct", "08 Oct"] },
+  { id: "30d", label: "30D", sales: 0, units: 0, salesChange: 0, unitsChange: 0, bars: [], ticks: ["02 Oct", "06 Oct", "10 Oct", "14 Oct", "18 Oct", "22 Oct", "26 Oct", "30 Oct"] },
+];
+
 export default function DynamicMetricsChartDemo() {
+  const font = { fontFamily: inter.style.fontFamily };
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white p-5">
-      <DynamicMetricsChart typography={{ fontFamily: inter.style.fontFamily }} />
+    <main className="flex min-h-screen flex-col items-center gap-10 bg-white p-5">
+      {/* Data state — reads every value from the component's own defaults */}
+      <DynamicMetricsChart typography={font} />
+
+      {/* Empty / no-data state — triggered by a frame with zero units */}
+      <DynamicMetricsChart typography={font} frames={emptyFrames} defaultTimeframe="30d" onRefresh={() => {}} />
     </main>
   );
 }
