@@ -59,7 +59,7 @@ const LIGHT: IsometricKeyboardColors = { surface: "#ffffff", case: "#9aa0a6", ke
 const DARK: IsometricKeyboardColors = { surface: "#0b0c0d", case: "#50525a", key: "#44464d", accent: "#ffffff" };
 
 const SIZES: IsometricKeyboardSizes = {
-  unit: 11, gap: 1.8, capHeight: 6.5, restGap: 4, caseHeight: 7, radius: 2.4, elevation: 0.42, scale: 1.46,
+  unit: 11, gap: 1.8, capHeight: 6.5, restGap: 4, caseHeight: 7, radius: 2.4, elevation: 0.5, scale: 1.75,
 };
 const SPRING: IsometricKeyboardSpring = { stiffness: 420, damping: 32, mass: 1 };
 const VBW = 400, VBH = 320;
@@ -131,7 +131,7 @@ export function IsometricKeyboard({
   const R = waveRadius * s.unit;
 
   const { keys, caseSil, caseTop, C } = useMemo(() => {
-    const cam = makeCam(45, s.elevation, s.scale);
+    const cam = makeCam(25, s.elevation, s.scale);
     let maxX = 0, maxY = 0;
     const raw: Key[] = [];
     for (const row of layout) {
@@ -160,6 +160,9 @@ export function IsometricKeyboard({
   const topRefs = useRef<(SVGPathElement | null)[]>([]);
   const overRef = useRef<Pt | null>(null);
   const retargetRef = useRef<() => void>(() => {});
+  // Held in a ref so an inline callback can't re-run the animation effect (which would reset every spring).
+  const onActivateRef = useRef(onKeyActivate);
+  useEffect(() => { onActivateRef.current = onKeyActivate; }, [onKeyActivate]);
 
   useEffect(() => {
     const P = proj(C);
@@ -217,13 +220,13 @@ export function IsometricKeyboard({
         const u = dist / R;
         st[i].t = u >= 1 ? 0 : s.restGap * (1 - u) * (1 - u);
       }
-      if (best !== nearest) { nearest = best; onKeyActivate?.(over && best >= 0 ? keys[best].label : null); }
+      if (best !== nearest) { nearest = best; onActivateRef.current?.(over && best >= 0 ? keys[best].label : null); }
       wake();
     };
 
     keys.forEach((_, i) => draw(i)); // first paint
     return () => { if (raf) cancelAnimationFrame(raf); };
-  }, [keys, C, R, TOP, s.restGap, sp.stiffness, sp.damping, sp.mass, reduce, onKeyActivate]);
+  }, [keys, C, R, TOP, s.restGap, sp.stiffness, sp.damping, sp.mass, reduce]);
 
   const toWorld = (e: ReactPointerEvent): Pt | null => {
     const svg = svgRef.current; if (!svg) return null;
