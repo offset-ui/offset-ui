@@ -52,9 +52,15 @@ export type ProximityScrollIndicatorSizes = {
   padding: number; // uniform padding inside the list card
   rowPaddingY: number; // vertical padding inside each row
   itemGap: number; // gap between a row's indicator line and its label
+  lineLength: number; // indicator line length, resting
+  lineLengthActive: number; // indicator line length, active row
+  lineThickness: number; // indicator line thickness ("stroke width"), resting
+  lineThicknessActive: number; // indicator line thickness, active row
 };
 
 export type ProximityScrollIndicatorSpring = { stiffness: number; damping: number; mass: number };
+
+export type ProximityScrollIndicatorTypography = { fontFamily?: string; fontSize: number; fontWeight: number; letterSpacing: number };
 
 export type ProximityScrollIndicatorProps = {
   sections?: ProximitySection[];
@@ -72,7 +78,7 @@ export type ProximityScrollIndicatorProps = {
   minProgress?: number;
   /** Opacity (0–1) applied to every heading except the active one. */
   inactiveOpacity?: number;
-  typography?: { fontFamily?: string; fontSize?: number; fontWeight?: number; letterSpacing?: number };
+  typography?: Partial<ProximityScrollIndicatorTypography>;
   className?: string;
 };
 
@@ -80,24 +86,31 @@ const COLORS: ProximityScrollIndicatorColors = {
   surface: "#fafafa",
   track: "#e6e6e6",
   progress: "#0047f9",
-  text: "#000000",
-  line: "#000000",
+  text: "#121212",
+  line: "#121212",
 };
 
 const SIZES: ProximityScrollIndicatorSizes = {
-  collapsedSize: 54,
-  radius: 16.5,
+  collapsedSize: 44,
+  radius: 30,
   strokeWidth: 2,
-  ringInset: 13,
+  ringInset: 14,
   stackGap: 12,
   padding: 16,
-  rowPaddingY: 5,
-  itemGap: 16,
+  rowPaddingY: 2.5,
+  itemGap: 12,
+  lineLength: 12,
+  lineLengthActive: 18,
+  // 1.5/2.5 rather than 1/1.8: `rounded-full` can only round up to half the thickness, so anything
+  // thinner than ~1.5px renders as a flat-capped sliver with no visible curve at all.
+  lineThickness: 1.5,
+  lineThicknessActive: 2.5,
 };
 
-const SPRING: ProximityScrollIndicatorSpring = { stiffness: 420, damping: 34, mass: 0.7 };
+// Critically damped (ζ≈0.9–1): reaches its target in one clean motion, no overshoot or settle-jiggle.
+const SPRING: ProximityScrollIndicatorSpring = { stiffness: 380, damping: 30, mass: 0.7 };
 /** Each row's own spring onto the shared pointer-derived target: quick to respond, settled, no overshoot jiggle. */
-const PROXIMITY_SPRING = { stiffness: 300, damping: 30, mass: 0.5 } as const;
+const PROXIMITY_SPRING = { stiffness: 420, damping: 32, mass: 0.6 } as const;
 
 const DEFAULT_SECTIONS: ProximitySection[] = [
   { id: "innovative-design-trends", label: "Innovative Design Trends" },
@@ -197,7 +210,7 @@ function HeadingRow({
   reduce: boolean | null;
   s: ProximityScrollIndicatorSizes;
   c: ProximityScrollIndicatorColors;
-  typo: { fontFamily?: string; fontSize: number; fontWeight: number; letterSpacing: number };
+  typo: ProximityScrollIndicatorTypography;
   onActivate: () => void;
   index: number;
   onMeasure: (index: number, centerY: number | null) => void;
@@ -228,12 +241,16 @@ function HeadingRow({
   });
   const scale = useSpring(rawScale, reduce ? { stiffness: 1000, damping: 100 } : PROXIMITY_SPRING);
 
+  const microTransition = { duration: reduce ? 0 : 0.2, ease: "easeOut" } as const;
+
   return (
     <li ref={rowRef} className="w-full list-none" style={{ paddingBlock: s.rowPaddingY }}>
-      <button
+      <motion.button
         type="button"
         onClick={onActivate}
-        className="flex w-full items-center rounded-md text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--psi-progress)]"
+        whileTap={reduce ? undefined : { scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        className="flex w-full cursor-pointer items-center rounded-md text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--psi-progress)]"
         style={{ gap: s.itemGap }}
         aria-current={isCurrentSection ? "true" : undefined}
       >
@@ -241,16 +258,16 @@ function HeadingRow({
           aria-hidden
           className="block shrink-0 rounded-full"
           animate={{
-            width: isActive ? 18 : 11,
-            height: isActive ? 1.5 : 1,
+            width: isActive ? s.lineLengthActive : s.lineLength,
+            height: isActive ? s.lineThicknessActive : s.lineThickness,
             backgroundColor: isActive ? c.progress : c.line,
             opacity: isActive ? 1 : inactiveOpacity,
           }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={microTransition}
         />
         <motion.span
           animate={{ color: c.text, opacity: isActive ? 1 : inactiveOpacity }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={microTransition}
           style={{
             scale,
             fontFamily: typo.fontFamily,
@@ -263,7 +280,7 @@ function HeadingRow({
         >
           {section.label}
         </motion.span>
-      </button>
+      </motion.button>
     </li>
   );
 }
@@ -273,11 +290,11 @@ export function ProximityScrollIndicator({
   colors,
   sizes,
   spring,
-  closeDelay = 260,
+  closeDelay = 180,
   proximityRadius = 40,
   maxScale = 1.08,
   minProgress = 0.035,
-  inactiveOpacity = 0.35,
+  inactiveOpacity = 0.40,
   typography,
   className,
 }: ProximityScrollIndicatorProps) {
@@ -285,7 +302,7 @@ export function ProximityScrollIndicator({
   const c = { ...COLORS, ...colors };
   const s = { ...SIZES, ...sizes };
   const sp = { ...SPRING, ...spring };
-  const typo = { fontFamily: undefined, fontSize: 10, fontWeight: 400, letterSpacing: -0.1, ...typography };
+  const typo = { fontFamily: undefined, fontSize: 10, fontWeight: 500, letterSpacing: 0, ...typography };
 
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState<string | null>(null);
@@ -379,6 +396,7 @@ export function ProximityScrollIndicator({
       <AnimatePresence>
         {open && (
           <motion.div
+            key="panel"
             initial={reduce ? false : { opacity: 0, scale: 0.92, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: -4 }}
