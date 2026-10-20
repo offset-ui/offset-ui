@@ -10,10 +10,34 @@
  * Dependencies: motion/react, next/font/google (Inter), clsx + tailwind-merge (via @/lib/utils).
  */
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type Ref } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties, type Ref } from "react";
 import { Inter } from "next/font/google";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useSpring, type MotionStyle } from "motion/react";
 import { cn } from "@/lib/utils";
+
+/** One memory. Plain strings are shorthand for `{ src }`. */
+export type MemoryCameraImage = {
+  src: string;
+  /** Accessible description of the photo (default "Memory n"). */
+  alt?: string;
+  /** Small caption on the stamp (default "#n"). */
+  label?: string;
+};
+
+/** Imperative controls, available through `ref`. */
+export type MemoryCameraHandle = {
+  /** Same as pressing the shutter. */
+  capture: () => void;
+  /** Same as pressing Replay. */
+  reset: () => void;
+};
+
+/** Screen-reader and button copy. */
+export type MemoryCameraText = {
+  shutter: string;
+  shutterDone: string;
+  replay: string;
+};
 
 export type MemoryCameraColors = {
   /** Paper the stamps are printed on. */
@@ -71,26 +95,39 @@ export type MemoryCameraTypography = {
 };
 
 export type MemoryCameraProps = {
-  /** Up to five images (extras are ignored). Pre-shaped stamps can pass `stampMask={false}`. */
-  images: string[];
+  /** Up to five images (extras are ignored); URLs or `{ src, alt, label }`. Pre-shaped stamps can pass `stampMask={false}`. */
+  images: (string | MemoryCameraImage)[];
+  /** Controlled number of printed memories. Omit to let the camera manage it. */
+  collected?: number;
+  /** Starting number of printed memories when uncontrolled. */
+  defaultCollected?: number;
+  /** Disable the shutter without changing its look. */
+  disabled?: boolean;
   /** Shown in the viewfinder once every memory is collected (default: the last memory). Until then the
    *  viewfinder previews the next image to be printed. */
   viewfinder?: string;
   /** Cut the stamp perforation into each image. Turn off for images that already have it baked in. */
   stampMask?: boolean;
   /** Camera tilts toward the cursor (3D parallax tilt). Stamps and the page are unaffected. */
-  tilt?: Partial<MemoryCameraTilt>;
+  tilt?: Partial<MemoryCameraTilt> | false;
   /** Strength of the noise grain on the camera body and paper slot: 0 hides it, 1 is the Figma look. */
   textureOpacity?: number;
   /** Shrink the whole layout to fit the available width instead of overflowing. */
   fit?: boolean;
   /** Show the replay button once every memory is collected. */
   replay?: boolean;
+  /** Show the counter text under the camera. */
+  showCounter?: boolean;
+  /** Show the small caption on each stamp. */
+  showLabels?: boolean;
+  /** Button and screen-reader copy. */
+  text?: Partial<MemoryCameraText>;
   /** Folder (public URL) containing the camera artwork. */
   assetPath?: string;
   /** Counter text; defaults to "3/5 memories collected". */
   counterLabel?: (collected: number, total: number) => string;
-  onCapture?: (index: number) => void;
+  /** Called when a memory prints; in controlled mode, raise `collected` here. */
+  onCapture?: (index: number, image: MemoryCameraImage) => void;
   onComplete?: () => void;
   onReset?: () => void;
   colors?: Partial<MemoryCameraColors>;
@@ -100,6 +137,9 @@ export type MemoryCameraProps = {
   typography?: Partial<MemoryCameraTypography>;
   /** Stamp tilt in degrees per slot. */
   rotations?: number[];
+  /** Vertical nudge in design px per slot, for a looser scrapbook feel. */
+  yOffsets?: number[];
+  ref?: Ref<MemoryCameraHandle>;
   className?: string;
 };
 
@@ -116,6 +156,7 @@ const TIMING: MemoryCameraTiming = { flash: 0.4, printDelay: 0.3, settleDelay: 0
 const TILT: MemoryCameraTilt = { max: 2, perspective: 500, stiffness: 100, damping: 50 };
 const ROTATIONS = [-8, 5, -3, 7, -5];
 const Y_OFFSETS = [0, 18, -6, 22, 4];
+const TEXT: MemoryCameraText = { shutter: "Take a photo", shutterDone: "All memories collected", replay: "Replay" };
 
 const inter = Inter({ subsets: ["latin"] });
 const TYPOGRAPHY: MemoryCameraTypography = { fontSize: 12, fontWeight: 400, fontFamily: inter.style.fontFamily };
@@ -160,18 +201,27 @@ function Layer({ src, style, className, ref }: { src: string; style?: CSSPropert
 
 type Slot = { x: number; y: number; rotate: number };
 
-function slotFor(index: number, total: number, centreX: number, sizes: MemoryCameraSizes, rotations: number[]): Slot {
+function slotFor(
+  index: number,
+  total: number,
+  centreX: number,
+  sizes: MemoryCameraSizes,
+  rotations: number[],
+  yOffsets: number[],
+): Slot {
   const centre = centreX - (sizes.stampPitch * (total - 1)) / 2 + sizes.stampPitch * index;
   return {
     x: centre - sizes.stampWidth / 2,
-    y: SCRAPBOOK_TOP + Y_OFFSETS[index % Y_OFFSETS.length],
+    y: SCRAPBOOK_TOP + (yOffsets[index % yOffsets.length] ?? 0),
     rotate: rotations[index % rotations.length] ?? 0,
   };
 }
 
 type StampProps = {
   centreX: number;
-  src: string;
+  image: MemoryCameraImage;
+  /** Caption under the photo; null hides it. */
+  label: string | null;
   index: number;
   slot: Slot;
   colors: MemoryCameraColors;
@@ -183,7 +233,7 @@ type StampProps = {
   reduce: boolean;
 };
 
-function Stamp({ centreX, src, index, slot, colors, sizes, spring, timing, typography, stampMask, reduce }: StampProps) {
+function Stamp({ centreX, image, label, index, slot, colors, sizes, spring, timing, typography, stampMask, reduce }: StampProps) {
   const instant = { duration: 0 };
   const hiddenY = SLIDE_END - sizes.stampHeight - 8;
   const slideX = centreX - sizes.stampWidth / 2;
@@ -224,23 +274,25 @@ function Stamp({ centreX, src, index, slot, colors, sizes, spring, timing, typog
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- user-supplied memory */}
-        <img src={src} alt={`Memory ${index + 1}`} draggable={false} className="size-full object-cover" />
+        <img src={image.src} alt={image.alt ?? `Memory ${index + 1}`} draggable={false} className="size-full object-cover" />
       </div>
-      <span
-        aria-hidden
-        className="absolute -translate-y-1/2 whitespace-nowrap"
-        style={{
-          left: 255,
-          top: 281.5,
-          color: colors.label,
-          fontSize: typography.fontSize,
-          fontWeight: typography.fontWeight,
-          fontFamily: typography.fontFamily,
-          lineHeight: "normal",
-        }}
-      >
-        #{index + 1}
-      </span>
+      {label !== null && (
+        <span
+          aria-hidden
+          className="absolute -translate-y-1/2 whitespace-nowrap"
+          style={{
+            left: 255,
+            top: 281.5,
+            color: colors.label,
+            fontSize: typography.fontSize,
+            fontWeight: typography.fontWeight,
+            fontFamily: typography.fontFamily,
+            lineHeight: "normal",
+          }}
+        >
+          {label}
+        </span>
+      )}
     </motion.div>
   );
 }
@@ -248,11 +300,17 @@ function Stamp({ centreX, src, index, slot, colors, sizes, spring, timing, typog
 export function MemoryCamera({
   images,
   viewfinder,
+  collected,
+  defaultCollected = 0,
+  disabled = false,
   stampMask = true,
   textureOpacity = 0.3,
   tilt,
   fit = true,
   replay = true,
+  showCounter = true,
+  showLabels = true,
+  text,
   assetPath = "/memory-camera",
   counterLabel = (n, total) => `${n}/${total} memories collected`,
   onCapture,
@@ -264,14 +322,20 @@ export function MemoryCamera({
   timing,
   typography,
   rotations = ROTATIONS,
+  yOffsets = Y_OFFSETS,
+  ref,
   className,
 }: MemoryCameraProps) {
   const reduce = useReducedMotion() ?? false;
-  const memories = useMemo(() => images.slice(0, MAX_IMAGES), [images]);
+  const memories = useMemo(
+    () => images.slice(0, MAX_IMAGES).map((image) => (typeof image === "string" ? { src: image } : image)),
+    [images],
+  );
   const total = memories.length;
-  const [count, setCount] = useState(0);
-  /** Image shown in the viewfinder; advances at the flash peak, before the stamp prints. */
-  const [previewCount, setPreviewCount] = useState(0);
+  const [innerCount, setInnerCount] = useState(defaultCollected);
+  const count = Math.min(collected ?? innerCount, total);
+  /** True between the flash peak and the stamp printing, so the viewfinder is already on the next image. */
+  const [flashed, setFlashed] = useState(false);
   const busy = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const peakTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -280,7 +344,8 @@ export function MemoryCamera({
   const camera = useRef<HTMLDivElement>(null);
   const shutter = useRef<HTMLImageElement>(null);
   const flash = useRef<HTMLDivElement>(null);
-  const tl = { ...TILT, ...tilt };
+  const tl = { ...TILT, ...(tilt === false ? { max: 0 } : tilt) };
+  const copy = { ...TEXT, ...text };
   const aimX = useMotionValue(0);
   const aimY = useMotionValue(0);
   const rotateX = useSpring(aimX, { stiffness: tl.stiffness, damping: tl.damping });
@@ -296,8 +361,9 @@ export function MemoryCamera({
     press: { ...SPRING.press, ...spring?.press },
   };
   const done = total > 0 && count >= total;
-  const lastSrc = memories[total - 1] ?? `${assetPath}/viewfinder.png`;
-  const viewfinderSrc = previewCount >= total ? (viewfinder ?? lastSrc) : (memories[previewCount] ?? lastSrc);
+  const previewCount = count + (flashed ? 1 : 0);
+  const lastSrc = memories[total - 1]?.src ?? `${assetPath}/viewfinder.png`;
+  const viewfinderSrc = previewCount >= total ? (viewfinder ?? lastSrc) : (memories[previewCount]?.src ?? lastSrc);
   const flashMask = stampMask ? STAMP_MASK : `url(${viewfinderSrc})`;
   const width = Math.max(FRAME_W, s.stampWidth + s.stampPitch * (total - 1) + 80);
   const height = SCRAPBOOK_TOP + 40 + s.stampHeight;
@@ -322,7 +388,7 @@ export function MemoryCamera({
 
   // Decode every memory up front so the viewfinder swap never waits on the network.
   useEffect(() => {
-    memories.forEach((src) => {
+    memories.forEach(({ src }) => {
       new Image().src = src;
     });
   }, [memories]);
@@ -363,7 +429,7 @@ export function MemoryCamera({
   }, [fit]);
 
   function capture() {
-    if (busy.current || count >= total) return;
+    if (busy.current || disabled || count >= total) return;
     busy.current = true;
     if (!reduce) {
       const press = { type: "spring", ...sp.press } as const;
@@ -371,13 +437,14 @@ export function MemoryCamera({
       animate(camera.current!, { scale: [1, 0.988, 1], y: [0, 4, 0] }, { duration: 0.45, ease: "easeOut" });
       animate(flash.current!, { opacity: [0, 0.95, 0] }, { duration: tm.flash, times: [0, 0.18, 1], ease: "easeOut" });
     }
-    peakTimer.current = setTimeout(() => setPreviewCount(count + 1), reduce ? 0 : tm.flash * 0.18 * 1000);
+    peakTimer.current = setTimeout(() => setFlashed(true), reduce ? 0 : tm.flash * 0.18 * 1000);
     timer.current = setTimeout(
       () => {
         const next = count + 1;
-        setCount(next);
+        if (collected === undefined) setInnerCount(next);
+        setFlashed(false);
         busy.current = false;
-        onCapture?.(next - 1);
+        onCapture?.(next - 1, memories[next - 1]);
         if (next === total) onComplete?.();
       },
       reduce ? 0 : tm.printDelay * 1000,
@@ -388,10 +455,12 @@ export function MemoryCamera({
     clearTimeout(timer.current);
     clearTimeout(peakTimer.current);
     busy.current = false;
-    setCount(0);
-    setPreviewCount(0);
+    setInnerCount(0);
+    setFlashed(false);
     onReset?.();
   }
+
+  useImperativeHandle(ref, () => ({ capture, reset }));
 
   return (
     <div ref={root} className={cn("flex w-full flex-col items-center gap-3", className)}>
@@ -466,13 +535,14 @@ export function MemoryCamera({
             style={{ width, height, clipPath: `inset(${SLIDE_END}px -400px -400px -400px)` }}
           >
             <AnimatePresence>
-              {memories.slice(0, count).map((src, i) => (
+              {memories.slice(0, count).map((image, i) => (
                 <Stamp
-                  key={`${src}-${i}`}
-                  src={src}
+                  key={`${image.src}-${i}`}
+                  image={image}
+                  label={showLabels ? (image.label ?? `#${i + 1}`) : null}
                   index={i}
                   centreX={width / 2}
-                  slot={slotFor(i, total, width / 2, s, rotations)}
+                  slot={slotFor(i, total, width / 2, s, rotations, yOffsets)}
                   colors={c}
                   sizes={s}
                   spring={sp}
@@ -495,8 +565,8 @@ export function MemoryCamera({
           <motion.button
             type="button"
             onClick={capture}
-            disabled={done}
-            aria-label={done ? "All memories collected" : "Take a photo"}
+            disabled={done || disabled}
+            aria-label={done ? copy.shutterDone : copy.shutter}
             className="absolute z-30 cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#008cff] focus-visible:ring-offset-2 disabled:cursor-not-allowed"
             style={{
               left: SHUTTER.x + cameraLeft,
@@ -510,7 +580,7 @@ export function MemoryCamera({
       </div>
 
       <div className="flex items-center gap-3" style={{ fontFamily: ty.fontFamily, fontSize: ty.fontSize, fontWeight: ty.fontWeight }}>
-        <p aria-live="polite" style={{ color: c.counter }}>
+        <p aria-live="polite" className={cn(!showCounter && "sr-only")} style={{ color: c.counter }}>
           {counterLabel(count, total)}
         </p>
         {replay && done && (
@@ -520,7 +590,7 @@ export function MemoryCamera({
             className="cursor-pointer rounded-full px-3 py-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#008cff] hover:bg-black/5"
             style={{ color: c.counter }}
           >
-            Replay
+            {copy.replay}
           </button>
         )}
       </div>
