@@ -16,7 +16,7 @@ const SECTIONS = [
 
 export default function ProximityScrollIndicatorDemo() {
   return (
-    <main className={`${roboto.className} min-h-screen bg-white`}>
+    <main className={`${roboto.className} min-h-screen bg-[#fafaf9]`}>
       <ProximityScrollIndicator typography={{ fontFamily: roboto.style.fontFamily }} />
 
       {SECTIONS.map((s, i) => (
