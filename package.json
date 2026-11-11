@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/offset-ui/offset-ui.git"
   },
-  "homepage": "https://github.com/offset-ui/offset-ui",
+  "homepage": "https://offset-ui-beta.vercel.app",
   "keywords": [
     "react",
     "components",

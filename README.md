@@ -2,6 +2,8 @@
 
 Animated React components built from real Figma designs. Copy, paste, make them yours.
 
+**Live docs and previews: <https://offset-ui-beta.vercel.app>**
+
 Every component is a single file with typed props, sensible defaults, keyboard and screen-reader support, and `prefers-reduced-motion` handled. Corners use the iOS-style squircle shape where the browser supports it.
 
 ## Components
