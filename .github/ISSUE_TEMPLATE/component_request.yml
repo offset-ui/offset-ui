@@ -1,0 +1,19 @@
+name: Component request
+description: Suggest a component you would like to see
+labels: [component-request]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What should it be
+    validations:
+      required: true
+  - type: textarea
+    id: use
+    attributes:
+      label: Where would you use it
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference or inspiration
+      description: Links or screenshots.
