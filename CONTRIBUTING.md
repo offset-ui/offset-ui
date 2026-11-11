@@ -27,4 +27,4 @@ Use the issue templates. For bugs, include the browser, what you expected and wh
 
 ## Code of conduct
 
-Be kind and assume good intent. Harassment or personal attacks are not welcome.
+Please follow our [Code of Conduct](CODE_OF_CONDUCT.md). For security issues, see [SECURITY.md](SECURITY.md).
