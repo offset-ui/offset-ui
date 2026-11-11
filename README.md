@@ -1,6 +1,6 @@
 # Offset UI
 
-Animated React components built from real Figma designs. Copy, paste, make them yours.
+Small interactions, big memories. Open-source React components built pixel-for-pixel from Figma, with motion you will remember.
 
 **Live docs and previews: <https://offset-ui-beta.vercel.app>**
 

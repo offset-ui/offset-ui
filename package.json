@@ -2,7 +2,7 @@
   "name": "offset-ui",
   "version": "0.1.0",
   "private": true,
-  "description": "Animated React components built from real Figma designs. Copy, paste, make them yours.",
+  "description": "Small interactions, big memories. Open-source React components built pixel-for-pixel from Figma, with motion you will remember.",
   "license": "MIT",
   "repository": {
     "type": "git",
