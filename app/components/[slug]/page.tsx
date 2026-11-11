@@ -75,18 +75,6 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
         </ol>
       </section>
 
-      {props.length > 0 && (
-        <section aria-labelledby="props" className="space-y-4">
-          <div className="space-y-1">
-            <h2 id="props" className="text-xl font-semibold tracking-tight">
-              Props
-            </h2>
-            <p className="text-sm text-stone-600">Every prop is optional unless marked with a red asterisk.</p>
-          </div>
-          <PropsTable props={props} groups={groups} />
-        </section>
-      )}
-
       <section aria-labelledby="setup" className="space-y-6 border-t border-black/10 pt-10">
         <div className="space-y-1">
           <h2 id="setup" className="text-xl font-semibold tracking-tight">
@@ -103,6 +91,18 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           </Step>
         </ol>
       </section>
+
+      {props.length > 0 && (
+        <section aria-labelledby="props" className="space-y-4 border-t border-black/10 pt-10">
+          <div className="space-y-1">
+            <h2 id="props" className="text-xl font-semibold tracking-tight">
+              Props
+            </h2>
+            <p className="text-sm text-stone-600">Every prop is optional unless marked with a red asterisk.</p>
+          </div>
+          <PropsTable props={props} groups={groups} />
+        </section>
+      )}
     </article>
   );
 }
