@@ -11,6 +11,9 @@ import { SITE } from "@/lib/site";
 
 const read = (file: string) => readFileSync(path.join(process.cwd(), file), "utf8");
 
+// Unknown slugs 404 straight away instead of being rendered on demand.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return COMPONENTS.map((c) => ({ slug: c.slug }));
 }
@@ -80,7 +83,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           <h2 id="setup" className="text-xl font-semibold tracking-tight">
             One-time setup
           </h2>
-          <p className="text-sm text-stone-600">Do this once per project. Every component here shares it. Requires React 19 and Tailwind CSS v4.</p>
+          <p className="text-sm text-stone-600">Do this once per project. Every component here shares it. Requires React 19 and Tailwind CSS v4. The components import the helper from <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-xs">@/lib/utils</code>; if your project has no <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-xs">@</code> path alias, change that import to a relative path.</p>
         </div>
         <ol className="space-y-8">
           <Step n={1} title="Install the dependencies">

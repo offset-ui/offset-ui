@@ -8,9 +8,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+// Only the code blocks use the mono font, so it loads when they appear instead of on every page.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata: Metadata = {

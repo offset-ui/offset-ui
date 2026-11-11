@@ -7,7 +7,7 @@
  * the caught imposter springs out, and the pill widens into "Verified".
  *
  * Artwork lives in /public/imposter-captcha and is configurable via `assetPath`.
- * Dependencies: motion/react, next/font/google (Inter), clsx + tailwind-merge (via @/lib/utils).
+ * Dependencies: motion/react, clsx + tailwind-merge (via @/lib/utils).
  */
 
 import {
@@ -20,7 +20,6 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
-import { Inter } from "next/font/google";
 import { AnimatePresence, animate, motion, useReducedMotion, type Transition } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -164,7 +163,7 @@ const TEXT = {
 
 const TYPOGRAPHY: ImposterCaptchaTypography = { title: 22, subtitle: 14, timer: 16, error: 14 };
 
-const inter = Inter({ subsets: ["latin"] });
+const FONT = "Inter, system-ui, sans-serif";
 
 // Figma geometry (design px).
 const CARD_W = 582;
@@ -499,7 +498,7 @@ export function ImposterCaptcha({
   const mmss = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
 
   return (
-    <div ref={root} className={cn("flex w-full justify-center", className)} style={{ fontFamily: fontFamily ?? inter.style.fontFamily }}>
+    <div ref={root} className={cn("flex w-full justify-center", className)} style={{ fontFamily: fontFamily ?? FONT }}>
       <div style={{ zoom: scale }}>
         <motion.div
           role="group"

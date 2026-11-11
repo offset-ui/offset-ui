@@ -7,11 +7,10 @@
  * After the last image the shutter is disabled; an optional replay button resets the collection.
  *
  * Artwork (camera layers + sample images) lives in /public/memory-camera and is configurable via `assetPath`.
- * Dependencies: motion/react, next/font/google (Inter), clsx + tailwind-merge (via @/lib/utils).
+ * Dependencies: motion/react, clsx + tailwind-merge (via @/lib/utils).
  */
 
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties, type Ref } from "react";
-import { Inter } from "next/font/google";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useSpring, type MotionStyle } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -158,8 +157,7 @@ const ROTATIONS = [-8, 5, -3, 7, -5];
 const Y_OFFSETS = [0, 18, -6, 22, 4];
 const TEXT: MemoryCameraText = { shutter: "Take a photo", shutterDone: "All memories collected", replay: "Replay" };
 
-const inter = Inter({ subsets: ["latin"] });
-const TYPOGRAPHY: MemoryCameraTypography = { fontSize: 12, fontWeight: 400, fontFamily: inter.style.fontFamily };
+const TYPOGRAPHY: MemoryCameraTypography = { fontSize: 12, fontWeight: 400, fontFamily: "Inter, system-ui, sans-serif" };
 
 // Figma frame geometry (design px): 735 x 623.03 camera frame.
 const FRAME_W = 735;
@@ -360,7 +358,7 @@ export function MemoryCamera({
   };
   const done = total > 0 && count >= total;
   const previewCount = count + (flashed ? 1 : 0);
-  const lastSrc = memories[total - 1]?.src ?? `${assetPath}/viewfinder.png`;
+  const lastSrc = memories[total - 1]?.src ?? `${assetPath}/viewfinder.webp`;
   const viewfinderSrc = previewCount >= total ? (viewfinder ?? lastSrc) : (memories[previewCount]?.src ?? lastSrc);
   const flashMask = stampMask ? STAMP_MASK : `url(${viewfinderSrc})`;
   const width = Math.max(FRAME_W, s.stampWidth + s.stampPitch * (total - 1) + 80);

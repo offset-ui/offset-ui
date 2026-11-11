@@ -15,7 +15,8 @@ export type ComponentEntry = {
   notes?: string[];
 };
 
-const NEXT_FONT = "Loads its font with next/font/google. Outside Next.js, replace that import with your own font and pass it through the font prop.";
+const FONT = "Uses Inter if your page loads it, otherwise your system font. Pass fontFamily to use your own.";
+const EMOJI = "Emoji use your system emoji font. Pass typography.fontFamily to use another, such as Noto Color Emoji.";
 
 /** Newest first. Add a component here and it appears in the sidebar, docs page and preview. */
 export const COMPONENTS: ComponentEntry[] = [
@@ -35,7 +36,7 @@ export const COMPONENTS: ComponentEntry[] = [
   onSuccess={() => setVerified(true)}
   onFail={(missed) => console.log(missed)}
 />`,
-    notes: [NEXT_FONT, "Set duration={0} for an untimed round (accessibility option)."],
+    notes: [FONT, "Set duration={0} for an untimed round (accessibility option)."],
   },
   {
     slug: "memory-camera",
@@ -51,7 +52,7 @@ export const COMPONENTS: ComponentEntry[] = [
   images={["/photos/1.png", "/photos/2.png", "/photos/3.png"]}
   onComplete={() => console.log("all collected")}
 />`,
-    notes: [NEXT_FONT, "Up to five images. Pass stampMask={false} if your images already have the stamp edge baked in."],
+    notes: [FONT, "Up to five images. Pass stampMask={false} if your images already have the stamp edge baked in."],
   },
   {
     slug: "checklist",
@@ -69,7 +70,7 @@ export const COMPONENTS: ComponentEntry[] = [
   ]}
   onCheckedChange={(ids) => console.log(ids)}
 />`,
-    notes: [NEXT_FONT],
+    notes: [EMOJI],
   },
   {
     slug: "proximity-scroll-indicator",

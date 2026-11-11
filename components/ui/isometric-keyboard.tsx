@@ -263,7 +263,7 @@ export function IsometricKeyboard({
       >
         <path d={caseSil} style={{ fill: "var(--ikb-surface)", stroke: "var(--ikb-case)" }} strokeWidth={1} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
         <path d={caseTop} style={{ fill: "var(--ikb-surface)", stroke: "var(--ikb-case)" }} strokeWidth={1} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-        {keys.map((k, i) => (
+        {keys.map((_, i) => (
           <g key={i}>
             <path ref={(el) => { silRefs.current[i] = el; }} style={{ fill: "var(--ikb-surface)", stroke: "var(--ikb-key)", transition: "stroke 150ms ease" }} strokeWidth={1} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
             <path ref={(el) => { topRefs.current[i] = el; }} style={{ fill: "var(--ikb-surface)", stroke: "var(--ikb-key)", transition: "stroke 150ms ease, fill 150ms ease, fill-opacity 150ms ease" }} strokeWidth={1} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />

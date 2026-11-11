@@ -5,6 +5,12 @@
   </picture>
 </p>
 
+<p align="center">
+  <a href="https://github.com/offset-ui/offset-ui/actions/workflows/ci.yml"><img src="https://github.com/offset-ui/offset-ui/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-MIT-1c1917" alt="MIT licence"></a>
+  <a href="https://github.com/offset-ui/offset-ui/releases"><img src="https://img.shields.io/github/v/release/offset-ui/offset-ui?color=F494BA&label=release" alt="Latest release"></a>
+</p>
+
 # Offset UI
 
 Small interactions, big memories. Open-source React components built pixel-for-pixel from Figma, with motion you will remember.
@@ -41,7 +47,7 @@ import { Checklist } from "@/components/ui/checklist";
 <Checklist items={[{ id: "a", label: "Ship it" }]} />
 ```
 
-Some components load their font with `next/font/google`, so they target Next.js. Outside Next.js, replace that import with your own font and pass it through the font prop.
+The components are plain React, so they work in Next.js, Vite, Remix, Astro and any other React 19 setup. They use your system font by default (Inter if your page loads it); pass `fontFamily` or `typography.fontFamily` to use your own.
 
 ## Run the docs site locally
 

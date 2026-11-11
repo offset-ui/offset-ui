@@ -8,7 +8,6 @@
  */
 
 import { Fragment, useRef, useState, type CSSProperties } from "react";
-import { Noto_Color_Emoji } from "next/font/google";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -111,14 +110,12 @@ const SIZES: ChecklistSizes = {
   particles: 100,
 };
 
-// Segoe UI has no emoji glyphs, so Noto Color Emoji supplies modern, smooth emoji on every platform.
-const emoji = Noto_Color_Emoji({ subsets: ["emoji"], weight: "400" });
-
+// Emoji use the system emoji font. Pass typography.fontFamily to load another (for example Noto Color Emoji).
 const TYPOGRAPHY: ChecklistTypography = {
   fontSize: 12,
   fontWeight: 500,
   letterSpacing: -0.1,
-  fontFamily: `"Segoe UI", ${emoji.style.fontFamily}, system-ui, sans-serif`,
+  fontFamily: '"Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif',
 };
 const TIMING: ChecklistTiming = { strike: 1, tick: 0.55, dissolve: 1.8 };
 const DITHER: ChecklistDither = { spread: 30, riseMin: 8, riseMax: 30, sizeMin: 1.5, sizeMax: 3, stagger: 0.25 };
