@@ -56,6 +56,10 @@ public/               artwork used by some components
 
 To add a component, put the file in `components/ui`, add a demo page in `app/preview/<slug>/page.tsx`, and add an entry to `lib/registry.ts`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Bonus: a code-audit skill
+
+If you build with an AI assistant, [`skills/code-audit.md`](skills/code-audit.md) is a ready-made prompt that audits code before you ship it. It looks for dead code, bugs, security and performance problems, and checks accessibility and reduced motion, then fixes what it finds without changing behaviour. In Claude Code, save it as `.claude/skills/code-audit/SKILL.md` and run it after you build a component. With any other assistant, paste it in and point it at your file.
+
 ## Browser support
 
 Modern evergreen browsers. The squircle corner shape (`corner-shape`) falls back to normal rounded corners where it is not supported.

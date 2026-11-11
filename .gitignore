@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal assistant notes and local tooling (kept on disk, not published)
+/UI-Lab Instructions Guide.md
+/CLAUDE.md
+/AGENTS.md
+/.claude/
