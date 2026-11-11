@@ -4,7 +4,7 @@ import { extractProps } from "@/lib/props";
 import type { ComponentEntry } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 
-const read = (file: string) => readFileSync(path.join(process.cwd(), file), "utf8");
+const read = (file: string) => readFileSync(path.join(/* turbopackIgnore: true */ process.cwd(), file), "utf8");
 
 /** One paste-ready brief for an AI coding assistant: setup, the full component, its props and a usage example. */
 export function buildAiPrompt(entry: ComponentEntry): string {

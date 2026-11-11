@@ -11,7 +11,7 @@ import { extractProps } from "@/lib/props";
 import { COMPONENTS, getComponent } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 
-const read = (file: string) => readFileSync(path.join(process.cwd(), file), "utf8");
+const read = (file: string) => readFileSync(path.join(/* turbopackIgnore: true */ process.cwd(), file), "utf8");
 
 // Unknown slugs 404 straight away instead of being rendered on demand.
 export const dynamicParams = false;

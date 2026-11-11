@@ -81,7 +81,7 @@ function toRows(members: ts.NodeArray<ts.TypeElement>, defaults: Map<string, str
  * the exported `*Props` type gives names, types and comments, the function's destructuring gives defaults.
  */
 export function extractProps(file: string): { props: PropRow[]; groups: PropGroup[] } {
-  const text = readFileSync(path.join(process.cwd(), file), "utf8");
+  const text = readFileSync(path.join(/* turbopackIgnore: true */ process.cwd(), file), "utf8");
   const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
   const propsType = source.statements
