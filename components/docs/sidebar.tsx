@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { COMPONENTS } from "@/lib/registry";
@@ -11,8 +12,8 @@ export function Sidebar() {
   return (
     <aside className="border-b border-black/10 md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:border-b-0 md:border-r">
       <div className="flex h-full flex-col gap-4 p-4 md:p-6">
-        <Link href="/" className="text-sm font-semibold tracking-tight outline-none focus-visible:underline">
-          {SITE.name}
+        <Link href="/" aria-label={SITE.name} className="w-fit rounded-md outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
+          <Image src="/brand/logo-complete-light.svg" alt="" width={110} height={24} />
         </Link>
 
         <nav aria-label="Components" className="-mx-1 flex gap-1 overflow-x-auto md:flex-1 md:flex-col md:overflow-y-auto md:overflow-x-visible">

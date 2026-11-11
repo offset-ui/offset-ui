@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Checklist } from "@/components/ui/checklist";
 import { SITE } from "@/lib/site";
@@ -6,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between px-6 py-5 md:px-10">
-        <span className="text-sm font-semibold tracking-tight">{SITE.name}</span>
+        <Image src="/brand/logo-complete-light.svg" alt={SITE.name} width={118} height={26} priority />
         <a
           href={SITE.github}
           target="_blank"

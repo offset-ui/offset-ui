@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-complete-dark.svg">
+    <img src="public/brand/logo-complete-light.svg" alt="Offset UI" width="320">
+  </picture>
+</p>
+
 # Offset UI
 
 Small interactions, big memories. Open-source React components built pixel-for-pixel from Figma, with motion you will remember.
