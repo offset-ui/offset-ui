@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { StarLink } from "@/components/docs/star-link";
 import { Checklist } from "@/components/ui/checklist";
+import { getStarCount } from "@/lib/github";
 import { COMPONENTS } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 
@@ -18,7 +20,8 @@ function Check() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const stars = await getStarCount();
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">
       {/* Soft brand glow behind the stage */}
@@ -28,14 +31,10 @@ export default function Home() {
         <Link href="/" aria-label={SITE.name} className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
           <Image src="/brand/logo-complete-light.svg" alt="" width={118} height={26} priority />
         </Link>
-        <a
-          href={SITE.github}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-black/10 px-4 py-1.5 text-sm text-stone-700 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400"
-        >
-          ★ GitHub
-        </a>
+        <StarLink
+          stars={stars}
+          className="rounded-full border border-black/10 px-4 py-1.5 text-sm text-stone-700 transition-colors hover:bg-black/5"
+        />
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-16 px-6 pb-14 pt-6 md:flex-row md:gap-14 md:px-10 lg:gap-24">

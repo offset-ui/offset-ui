@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { COMPONENTS } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { Newsletter } from "./newsletter";
+import { StarLink } from "./star-link";
 
-export function Sidebar() {
+export function Sidebar({ stars }: { stars: number | null }) {
   const pathname = usePathname();
   return (
     <aside className="border-b border-black/10 md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:border-b-0 md:border-r">
@@ -37,16 +39,23 @@ export function Sidebar() {
           })}
         </nav>
 
-        <a
-          href={SITE.github}
-          target="_blank"
-          rel="noreferrer"
-          className="hidden rounded-xl border border-black/10 p-3 text-xs leading-relaxed text-stone-600 outline-none transition-colors hover:bg-black/[.03] focus-visible:ring-2 focus-visible:ring-stone-400 md:block"
-        >
-          <span className="font-medium text-foreground">★ Star on GitHub</span>
-          <br />
-          Every star helps us ship the next component sooner.
-        </a>
+        <div className="hidden space-y-3 md:block">
+          <a
+            href={SITE.requestComponent}
+            target="_blank"
+            rel="noreferrer"
+            className="block rounded-lg px-3 py-2 text-sm text-stone-600 outline-none transition-colors hover:bg-black/[.04] focus-visible:ring-2 focus-visible:ring-stone-400"
+          >
+            + Request a component
+          </a>
+          <Newsletter compact />
+          <div className="rounded-xl border border-black/10 p-3 text-xs leading-relaxed text-stone-600">
+            <StarLink stars={stars} className="font-medium text-foreground hover:underline">
+              Star on GitHub
+            </StarLink>
+            <p className="mt-1">Every star helps us ship the next component sooner.</p>
+          </div>
+        </div>
       </div>
     </aside>
   );

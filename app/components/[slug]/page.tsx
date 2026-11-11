@@ -3,6 +3,8 @@ import path from "node:path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/docs/code-block";
+import { Newsletter } from "@/components/docs/newsletter";
+import { CopyForAi, ShareLinks } from "@/components/docs/page-actions";
 import { PreviewFrame } from "@/components/docs/preview-frame";
 import { PropsTable } from "@/components/docs/props-table";
 import { extractProps } from "@/lib/props";
@@ -20,7 +22,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/components/[slug]">): Promise<Metadata> {
   const entry = getComponent((await params).slug);
-  return entry ? { title: `${entry.name} · ${SITE.name}`, description: entry.description } : {};
+  return entry
+    ? {
+        title: `${entry.name} · ${SITE.name}`,
+        description: entry.description,
+        openGraph: { title: `${entry.name} · ${SITE.name}`, description: entry.description, url: `/components/${entry.slug}` },
+      }
+    : {};
 }
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
@@ -48,6 +56,10 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
       <header className="space-y-3">
         <h1 className="text-3xl font-semibold tracking-tight">{entry.name}</h1>
         <p className="max-w-2xl text-base leading-relaxed text-stone-600">{entry.description}</p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-1">
+          <CopyForAi slug={entry.slug} />
+          <ShareLinks slug={entry.slug} name={entry.name} />
+        </div>
       </header>
 
       <PreviewFrame slug={entry.slug} title={entry.name} height={entry.previewHeight} />
@@ -106,6 +118,8 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           <PropsTable props={props} groups={groups} />
         </section>
       )}
+
+      <Newsletter />
     </article>
   );
 }
