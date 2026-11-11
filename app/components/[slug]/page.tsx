@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/docs/code-block";
 import { PreviewFrame } from "@/components/docs/preview-frame";
+import { PropsTable } from "@/components/docs/props-table";
+import { extractProps } from "@/lib/props";
 import { COMPONENTS, getComponent } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 
@@ -36,6 +38,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
 
   const source = read(entry.file);
   const utils = read("lib/utils.ts");
+  const { props, groups } = extractProps(entry.file);
 
   return (
     <article className="mx-auto max-w-4xl space-y-12 px-5 py-8 md:px-10 md:py-12">
@@ -71,6 +74,18 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           </Step>
         </ol>
       </section>
+
+      {props.length > 0 && (
+        <section aria-labelledby="props" className="space-y-4">
+          <div className="space-y-1">
+            <h2 id="props" className="text-xl font-semibold tracking-tight">
+              Props
+            </h2>
+            <p className="text-sm text-stone-600">Every prop is optional unless marked with a red asterisk.</p>
+          </div>
+          <PropsTable props={props} groups={groups} />
+        </section>
+      )}
 
       <section aria-labelledby="setup" className="space-y-6 border-t border-black/10 pt-10">
         <div className="space-y-1">

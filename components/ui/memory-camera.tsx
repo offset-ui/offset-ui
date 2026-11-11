@@ -195,7 +195,6 @@ const STAMP_MASK_STYLE: CSSProperties = { WebkitMaskImage: STAMP_MASK, maskImage
 const noClickThrough = "pointer-events-none absolute max-w-none select-none";
 
 function Layer({ src, style, className, ref }: { src: string; style?: CSSProperties; className?: string; ref?: Ref<HTMLImageElement> }) {
-  // eslint-disable-next-line @next/next/no-img-element -- decorative, fixed-size artwork
   return <img ref={ref} src={src} alt="" draggable={false} className={cn(noClickThrough, className)} style={style} />;
 }
 
@@ -273,7 +272,6 @@ function Stamp({ centreX, image, label, index, slot, colors, sizes, spring, timi
           ...(stampMask ? STAMP_MASK_STYLE : {}),
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- user-supplied memory */}
         <img src={image.src} alt={image.alt ?? `Memory ${index + 1}`} draggable={false} className="size-full object-cover" />
       </div>
       {label !== null && (
@@ -486,7 +484,6 @@ export function MemoryCamera({
                   ...(stampMask ? STAMP_MASK_STYLE : {}),
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- user-supplied memory */}
                 <img
                   src={viewfinderSrc}
                   alt=""

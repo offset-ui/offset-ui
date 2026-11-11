@@ -194,7 +194,6 @@ type Phase = "playing" | "failed" | "verified";
 const asSpring = (s: ImposterCaptchaSpring): Transition => ({ type: "spring", ...s });
 
 function Art({ src, w, h, x, y, className, style }: { src: string; w: number; h: number; x?: number; y?: number; className?: string; style?: CSSProperties }) {
-  // eslint-disable-next-line @next/next/no-img-element -- decorative, fixed-size artwork
   return <img src={src} alt="" width={w} height={h} draggable={false} className={cn("pointer-events-none max-w-none select-none", x !== undefined && "absolute", className)} style={{ left: x, top: y, width: w, height: h, ...style }} />;
 }
 
