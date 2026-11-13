@@ -33,9 +33,9 @@
 <feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 "/>
 </feComponentTransfer>
 <feComposite operator="in" in2="effect3_innerShadow_0_96" in="coloredNoise2" result="noise2Clipped" />
-<feFlood flood-color="rgba(64, 59, 51, 0.13)" result="color1Flood" />
+<feFlood flood-color="rgba(64, 59, 51, 0.039)" result="color1Flood" />
 <feComposite operator="in" in2="noise1Clipped" in="color1Flood" result="color1" />
-<feFlood flood-color="rgba(255, 250, 242, 0.23)" result="color2Flood" />
+<feFlood flood-color="rgba(255, 250, 242, 0.069)" result="color2Flood" />
 <feComposite operator="in" in2="noise2Clipped" in="color2Flood" result="color2" />
 <feMerge result="effect4_noise_0_96">
 <feMergeNode in="effect3_innerShadow_0_96" />

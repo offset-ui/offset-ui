@@ -82,7 +82,7 @@ export default async function Home() {
         <div className="relative w-full max-w-sm motion-safe:animate-[rise_.7s_.12s_ease-out_both]">
           <div aria-hidden className="absolute inset-0 translate-x-5 translate-y-5 rounded-[44px] bg-[#F494BA]" style={squircle} />
           <div className="relative flex items-center justify-center rounded-[44px] border border-black/5 bg-[#fcfcfb] p-12" style={squircle}>
-            <Checklist className="w-[250px]" />
+            <Checklist />
           </div>
         </div>
       </main>

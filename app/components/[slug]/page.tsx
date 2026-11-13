@@ -49,7 +49,11 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
 
   const source = read(entry.file);
   const utils = read("lib/utils.ts");
-  const { props, groups } = extractProps(entry.file);
+  const { props: found, groups: foundGroups } = extractProps(entry.file);
+  const docs = entry.propDocs ?? {};
+  const withDoc = (row: (typeof found)[number]) => ({ ...row, description: row.description || docs[row.name] || "" });
+  const props = found.map(withDoc);
+  const groups = foundGroups.map((g) => ({ ...g, rows: g.rows.map(withDoc) }));
 
   return (
     <article className="mx-auto max-w-4xl space-y-12 px-5 py-8 md:px-10 md:py-12">

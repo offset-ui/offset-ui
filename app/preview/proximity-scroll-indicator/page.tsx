@@ -5,7 +5,6 @@ import { ProximityScrollIndicator } from "@/components/ui/proximity-scroll-indic
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
-// Section copy matches the headings shown in the nav exactly.
 const SECTIONS = [
   { id: "innovative-design-trends", title: "Innovative Design Trends", body: "New visual languages, motion-first interfaces and adaptive layouts are reshaping how products feel." },
   { id: "sustainable-materials", title: "Sustainable Materials", body: "Designers are rethinking the raw inputs of hardware and packaging, favouring recycled and bio-based options." },
@@ -17,7 +16,7 @@ const SECTIONS = [
 export default function ProximityScrollIndicatorDemo() {
   return (
     <main className={`${roboto.className} min-h-screen bg-[#fafaf9]`}>
-      <ProximityScrollIndicator typography={{ fontFamily: roboto.style.fontFamily }} />
+      <ProximityScrollIndicator />
 
       {SECTIONS.map((s, i) => (
         <section key={s.id} id={s.id} className="flex min-h-screen flex-col items-center justify-center gap-4 border-b border-neutral-100 px-8 text-center">

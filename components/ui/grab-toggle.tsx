@@ -1,238 +1,193 @@
 "use client";
 
-import { useId, useRef, useState, type CSSProperties, type Ref } from "react";
-import { animate, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from "react";
+import { animate, useReducedMotion, type AnimationPlaybackControls } from "motion/react";
 import { cn } from "@/lib/utils";
 
+export type GrabToggleColors = {
+  track: string;
+  trackOn: string;
+  knob: string;
+  knobOn: string;
+  skin: string;
+  sleeve: string;
+};
+
+export type GrabToggleProps = {
+  size?: "small" | "medium" | "large";
+  checked?: boolean;
+  defaultChecked?: boolean;
+  disabled?: boolean;
+  colors?: Partial<GrabToggleColors>;
+  ariaLabel?: string;
+  onCheckedChange?: (checked: boolean) => void;
+  className?: string;
+};
+
+const COLORS: GrabToggleColors = {
+  track: "#DEDEDE",
+  trackOn: "#D2F8FF",
+  knob: "#FFFFFF",
+  knobOn: "#0089EB",
+  skin: "#FFD28B",
+  sleeve: "#0089EB",
+};
+
+const SIZES = { small: 44, medium: 46, large: 48 };
 const WIDTH = 394;
 const HEIGHT = 191;
-const CIRCLE = 157;
+const KNOB = 157;
 const INSET = 17;
 const HAND_WIDTH = 334;
-const CIRCLE_OFF_X = INSET;
-const CIRCLE_ON_X = WIDTH - INSET - CIRCLE;
-const RIGHT_HIDDEN = WIDTH + 80;
-const LEFT_HIDDEN = -HAND_WIDTH - 80;
-const RIGHT_THUMB = 50;
-const LEFT_THUMB = 138;
-const RIGHT_GRAB = 59;
-const LEFT_GRAB = -236;
+const OFF_X = INSET;
+const ON_X = WIDTH - INSET - KNOB;
+const DURATION = 1.5;
 const EASE = [0.5, 0, 0.5, 1] as const;
-const SIZES = { small: 44, medium: 46, large: 48 } as const;
 const K = HAND_WIDTH / 37.2995;
+const SIDES = [
+  { hidden: WIDTH + 80, thumb: 50, grab: 59, flip: "" },
+  { hidden: -HAND_WIDTH - 80, thumb: 138, grab: -236, flip: " scaleX(-1)" },
+];
+const OUTLINE = { stroke: "#FFFFFF", strokeWidth: 2 };
+const SKIN: CSSProperties = { fill: "var(--gt-skin)", ...OUTLINE };
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-type HandColors = { fill: string; stroke: string; strokeWidth: number; cuff: string; cuffShade: string; gap: string; gapEdge: string };
-type ThumbColors = { fill: string; shade: string; stroke: string; strokeWidth: number };
+type ArtProps = { ref: Ref<SVGSVGElement>; width: number; height: number; className: string; style: CSSProperties; children: ReactNode };
 
-const HAND_DEFAULTS: HandColors = {
-  fill: "#FFD28B",
-  stroke: "#FFFFFF",
-  strokeWidth: 2,
-  cuff: "#0089EB",
-  cuffShade: "#0068B2",
-  gap: "#000000",
-  gapEdge: "#3A3A3A",
-};
-const THUMB_DEFAULTS: ThumbColors = { fill: "#FFD28B", shade: "#FAE0BD", stroke: "#FFFFFF", strokeWidth: 2 };
-
-export type GrabToggleProps = {
-  size?: keyof typeof SIZES;
-  duration?: number;
-  defaultChecked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
-  disabled?: boolean;
-  pillOff?: string;
-  pillOn?: string;
-  circleOff?: string;
-  circleOn?: string;
-  handColors?: Partial<HandColors>;
-  thumbColors?: Partial<ThumbColors>;
-  className?: string;
-};
-
-type ArtProps = { ref: Ref<SVGSVGElement>; style: CSSProperties; className: string };
-
-function HandArt({ ref, colors, style, className }: ArtProps & { colors: HandColors }) {
-  const filterId = `hdt-hand-${useId().replace(/:/g, "")}`;
+function Art({ ref, width, height, className, style, children }: ArtProps) {
   return (
-    <svg ref={ref} width={HAND_WIDTH} height={116.5} viewBox="0 0 334 116.5" fill="none" style={style} className={className} aria-hidden>
-      <defs>
-        <filter id={filterId} x="0" y="0" width="334" height="116.5" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-          <feOffset dy={-0.5 * K} />
-          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0" />
-          <feBlend in2="shape" />
-        </filter>
-      </defs>
-      <path
-        d="M190.504 115.5H36.0042C36.0042 115.5 26.0041 114.011 26.0041 102.5C26.0041 91.5 36.0042 90 36.0042 90H81.5041C84.4398 90 84.5041 86.5 81.5042 86.5H23.5042C23.5042 86.5 14.0041 85.0019 14.0041 73C14.0041 59.5 23.5042 60 23.5042 60H83.0042C86.5041 59 85.5041 55.5 83.0042 55H12.0042C12.0042 55 1.25639 55.5 1.00417 42.5C0.751957 29.5 12.0042 29.5 12.0042 29.5H86.0042C89.5041 29.5 89.5041 24.5 86.0042 24.5H23.5042C23.5042 24.5 12.8379 23.4919 13.5042 11.5C14.0042 2.5 23.5042 1 23.5042 1H190.504V115.5Z"
-        fill={colors.fill}
-        stroke={colors.stroke}
-        strokeWidth={colors.strokeWidth}
-        filter={`url(#${filterId})`}
-      />
-      <g transform={`scale(${K})`}>
-        <path d="M22.2074 1.4078H23.0849V11.8847H22.2074V1.4078Z" fill={colors.gap} />
-        <path d="M21.33 1.4078V11.8847H22.2074V1.4078H21.33Z" fill={colors.gapEdge} />
-        <path d="M23.0849 12.5559C23.0849 12.5559 33.6116 12.5559 35.1116 11.5559C36.6116 10.5558 36.6116 0.0558941 36.6116 0.0558941L23.0849 0.0559399V1.4078V11.8847V12.5559Z" fill={colors.cuff} />
-        <path d="M23.0849 12.8986H37.2995V0.0559399L36.6116 0.0558941C36.6116 0.0558941 36.6116 10.5558 35.1116 11.5559C33.6116 12.5559 23.0849 12.5559 23.0849 12.5559V12.8986Z" fill={colors.cuffShade} />
-      </g>
+    <svg ref={ref} width={width} height={height} viewBox={`0 0 ${width} ${height}`} fill="none" aria-hidden style={style} className={cn("pointer-events-none absolute left-0 max-w-none", className)}>
+      {children}
     </svg>
   );
 }
 
-function ThumbArt({ ref, colors, style, className }: ArtProps & { colors: ThumbColors }) {
-  const filterId = `hdt-thumb-${useId().replace(/:/g, "")}`;
-  return (
-    <svg ref={ref} width={145.574} height={76.5} viewBox="0 0 145.574 76.5" fill="none" style={style} className={className} aria-hidden>
-      <defs>
-        <filter id={filterId} x="0" y="0" width="145.574" height="76.5" filterUnits="userSpaceOnUse">
-          <feDropShadow dy="1" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.07" />
-        </filter>
-      </defs>
-      <path
-        d="M32.5741 5H116.574H139.574V69.5H110.574C86.1741 69.5 70.0741 50.1667 65.0741 40.5C54.2408 40.3333 29.7741 39.2 18.5741 36C7.3741 32.8 5.5741 18.3333 6.0741 11.5L32.5741 5Z"
-        fill={colors.fill}
-        stroke={colors.stroke}
-        strokeWidth={colors.strokeWidth}
-        filter={`url(#${filterId})`}
-      />
-      <g transform={`scale(${K})`}>
-        <path d="M3.63772 0.558376L0.678329 1.28426C0.675884 1.31768 0.673931 1.35273 0.672537 1.38924C0.665743 1.76291 0.769874 2.9838 2.47156 2.55838C4.47156 2.05838 3.63772 0.558376 3.63772 0.558376Z" fill={colors.shade} />
-      </g>
-    </svg>
-  );
-}
+const HAND = (
+  <>
+    <path
+      d="M190.504 115.5H36.0042C36.0042 115.5 26.0041 114.011 26.0041 102.5C26.0041 91.5 36.0042 90 36.0042 90H81.5041C84.4398 90 84.5041 86.5 81.5042 86.5H23.5042C23.5042 86.5 14.0041 85.0019 14.0041 73C14.0041 59.5 23.5042 60 23.5042 60H83.0042C86.5041 59 85.5041 55.5 83.0042 55H12.0042C12.0042 55 1.25639 55.5 1.00417 42.5C0.751957 29.5 12.0042 29.5 12.0042 29.5H86.0042C89.5041 29.5 89.5041 24.5 86.0042 24.5H23.5042C23.5042 24.5 12.8379 23.4919 13.5042 11.5C14.0042 2.5 23.5042 1 23.5042 1H190.504V115.5Z"
+      style={SKIN}
+    />
+    <g transform={`scale(${K})`}>
+      <rect x="21.33" y="1.4078" width="0.8774" height="10.4769" fill="#3A3A3A" />
+      <rect x="22.2074" y="1.4078" width="0.8775" height="10.4769" fill="#000000" />
+      <path d="M23.0849 12.8986H37.2995V0.0559399H23.0849Z" style={{ fill: "color-mix(in srgb, var(--gt-sleeve) 76%, black)" }} />
+      <path d="M23.0849 12.5559C23.0849 12.5559 33.6116 12.5559 35.1116 11.5559C36.6116 10.5558 36.6116 0.0558941 36.6116 0.0558941L23.0849 0.0559399Z" style={{ fill: "var(--gt-sleeve)" }} />
+    </g>
+  </>
+);
 
-export function GrabToggle({
-  size = "medium",
-  duration = 1.5,
-  defaultChecked = false,
-  onCheckedChange,
-  disabled = false,
-  pillOff = "#DEDEDE",
-  pillOn = "#D2F8FF",
-  circleOff = "#FFFFFF",
-  circleOn = "#0089EB",
-  handColors,
-  thumbColors,
-  className,
-}: GrabToggleProps) {
-  const [checked, setChecked] = useState(defaultChecked);
-  const scale = SIZES[size] / HEIGHT;
+const THUMB = (
+  <path
+    d="M32.5741 5H116.574H139.574V69.5H110.574C86.1741 69.5 70.0741 50.1667 65.0741 40.5C54.2408 40.3333 29.7741 39.2 18.5741 36C7.3741 32.8 5.5741 18.3333 6.0741 11.5L32.5741 5Z"
+    style={SKIN}
+  />
+);
+
+export function GrabToggle({ size = "medium", checked, defaultChecked = false, disabled = false, colors, ariaLabel = "Toggle", onCheckedChange, className }: GrabToggleProps) {
+  const [inner, setInner] = useState(defaultChecked);
+  const value = checked ?? inner;
+  const [initial] = useState(value);
+  const shown = useRef(value);
   const busy = useRef(false);
   const reduceMotion = useReducedMotion();
   const pill = useRef<HTMLButtonElement>(null);
-  const circle = useRef<HTMLSpanElement>(null);
-  const rightHand = useRef<SVGSVGElement>(null);
-  const leftHand = useRef<SVGSVGElement>(null);
-  const rightThumb = useRef<SVGSVGElement>(null);
-  const leftThumb = useRef<SVGSVGElement>(null);
+  const knobRef = useRef<HTMLSpanElement>(null);
+  const hands = useRef<(SVGSVGElement | null)[]>([]);
+  const thumbs = useRef<(SVGSVGElement | null)[]>([]);
+  const { track, trackOn, knob, knobOn, skin, sleeve } = { ...COLORS, ...colors };
+  const scale = SIZES[size] / HEIGHT;
 
-  async function toggle() {
-    if (busy.current || disabled) return;
+  useEffect(() => {
+    if (shown.current === value) return;
+    shown.current = value;
     busy.current = true;
-    const next = !checked;
-    setChecked(next);
-    onCheckedChange?.(next);
 
-    const hand = next ? rightHand.current! : leftHand.current!;
-    const thumb = next ? rightThumb.current! : leftThumb.current!;
-    const flip = next ? "" : " scaleX(-1)";
-    const thumbOffset = next ? RIGHT_THUMB : LEFT_THUMB;
-    const from = next ? CIRCLE_OFF_X : CIRCLE_ON_X;
-    const to = next ? CIRCLE_ON_X : CIRCLE_OFF_X;
-    const grab = from + (next ? RIGHT_GRAB : LEFT_GRAB);
-    const release = to + (next ? RIGHT_GRAB : LEFT_GRAB);
-    const hidden = next ? RIGHT_HIDDEN : LEFT_HIDDEN;
+    const side = SIDES[value ? 0 : 1];
+    const hand = hands.current[value ? 0 : 1]!;
+    const thumb = thumbs.current[value ? 0 : 1]!;
+    const from = value ? OFF_X : ON_X;
+    const to = value ? ON_X : OFF_X;
+    const grab = from + side.grab;
+    const release = to + side.grab;
 
-    const place = (handX: number, circleX: number) => {
-      hand.style.transform = `translateX(${handX}px)${flip}`;
-      thumb.style.transform = `translateX(${handX + thumbOffset}px)${flip}`;
-      circle.current!.style.transform = `translateX(${circleX}px)`;
+    const place = (handX: number, knobX: number) => {
+      hand.style.transform = `translateX(${handX}px)${side.flip}`;
+      thumb.style.transform = `translateX(${handX + side.thumb}px)${side.flip}`;
+      knobRef.current!.style.transform = `translateX(${knobX}px)`;
     };
 
-    const colourTiming = reduceMotion ? { duration: 0 } : { duration: 0.25, delay: duration / 3, ease: EASE };
-    const pillColour = animate(pill.current!, { background: next ? pillOn : pillOff }, colourTiming);
-    const circleColour = animate(circle.current!, { background: next ? circleOn : circleOff }, colourTiming);
-    const move = animate(0, 1, {
-      duration: reduceMotion ? 0 : duration,
-      ease: "linear",
-      onUpdate: (p) => {
-        if (p < 0.35) {
-          place(lerp(hidden, grab, smooth(p / 0.35)), from);
-        } else if (p < 0.7) {
-          const u = smooth((p - 0.35) / 0.35);
-          place(lerp(grab, release, u), lerp(from, to, u));
-        } else {
-          place(lerp(release, hidden, smooth((p - 0.7) / 0.3)), to);
-        }
-      },
-    });
-    try {
-      await Promise.all([move, pillColour, circleColour]);
-    } finally {
+    const colourTiming = reduceMotion ? { duration: 0 } : { duration: 0.25, delay: DURATION / 3, ease: EASE };
+    const controls: AnimationPlaybackControls[] = [
+      animate(pill.current!, { background: value ? trackOn : track }, colourTiming),
+      animate(knobRef.current!, { background: value ? knobOn : knob }, colourTiming),
+      animate(0, 1, {
+        duration: reduceMotion ? 0 : DURATION,
+        ease: "linear",
+        onUpdate: (p) => {
+          if (p < 0.35) place(lerp(side.hidden, grab, smooth(p / 0.35)), from);
+          else if (p < 0.7) {
+            const u = smooth((p - 0.35) / 0.35);
+            place(lerp(grab, release, u), lerp(from, to, u));
+          } else place(lerp(release, side.hidden, smooth((p - 0.7) / 0.3)), to);
+        },
+      }),
+    ];
+    Promise.all(controls).finally(() => {
       busy.current = false;
-    }
-  }
+    });
+    return () => {
+      controls.forEach((c) => c.stop());
+      busy.current = false;
+    };
+  }, [value, reduceMotion, track, trackOn, knob, knobOn]);
 
-  const hand = { ...HAND_DEFAULTS, ...handColors };
-  const thumb = { ...THUMB_DEFAULTS, ...thumbColors };
-  const art = "pointer-events-none absolute left-0 max-w-none";
+  function toggle() {
+    if (busy.current || disabled) return;
+    if (checked === undefined) setInner(!value);
+    onCheckedChange?.(!value);
+  }
 
   return (
     <button
       ref={pill}
       type="button"
       role="switch"
-      aria-checked={checked}
+      aria-checked={value}
+      aria-label={ariaLabel}
       disabled={disabled}
       onClick={toggle}
-      style={{ width: WIDTH * scale, height: HEIGHT * scale, background: defaultChecked ? pillOn : pillOff }}
+      style={{ width: WIDTH * scale, height: HEIGHT * scale, background: initial ? trackOn : track, "--gt-skin": skin, "--gt-sleeve": sleeve, "--gt-on": knobOn } as CSSProperties}
       className={cn(
-        "relative shrink-0 cursor-pointer overflow-hidden rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0089EB] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "relative shrink-0 cursor-pointer overflow-hidden rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gt-on)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
     >
-      <div className="absolute left-0 top-0 h-[191px] w-[394px] origin-top-left" style={{ transform: `scale(${scale})` }}>
-        <HandArt
-          ref={rightHand}
-          colors={hand}
-          className={`${art} top-[37px]`}
-          style={{ transform: `translateX(${RIGHT_HIDDEN}px)` }}
-        />
-        <HandArt
-          ref={leftHand}
-          colors={hand}
-          className={`${art} top-[37px]`}
-          style={{ transform: `translateX(${LEFT_HIDDEN}px) scaleX(-1)` }}
-        />
+      <div className="absolute left-0 top-0 origin-top-left" style={{ width: WIDTH, height: HEIGHT, transform: `scale(${scale})` }}>
+        {SIDES.map((s, i) => (
+          <Art key={i} ref={(el) => void (hands.current[i] = el)} width={HAND_WIDTH} height={116.5} className="top-[37px]" style={{ transform: `translateX(${s.hidden}px)${s.flip}` }}>
+            {HAND}
+          </Art>
+        ))}
         <span
-          ref={circle}
-          className="absolute left-0 top-[17px] h-[157px] w-[157px] rounded-full"
-          style={{
-            transform: `translateX(${defaultChecked ? CIRCLE_ON_X : CIRCLE_OFF_X}px)`,
-            background: defaultChecked ? circleOn : circleOff,
-          }}
+          ref={knobRef}
+          className="absolute left-0 top-[17px] rounded-full"
+          style={{ width: KNOB, height: KNOB, transform: `translateX(${initial ? ON_X : OFF_X}px)`, background: initial ? knobOn : knob }}
         />
-        <ThumbArt
-          ref={rightThumb}
-          colors={thumb}
-          className={`${art} top-[33px]`}
-          style={{ transform: `translateX(${RIGHT_HIDDEN + RIGHT_THUMB}px)` }}
-        />
-        <ThumbArt
-          ref={leftThumb}
-          colors={thumb}
-          className={`${art} top-[33px]`}
-          style={{ transform: `translateX(${LEFT_HIDDEN + LEFT_THUMB}px) scaleX(-1)` }}
-        />
+        {SIDES.map((s, i) => (
+          <Art
+            key={i}
+            ref={(el) => void (thumbs.current[i] = el)}
+            width={145.574}
+            height={76.5}
+            className="top-[33px] drop-shadow-[0_1px_2.5px_rgba(0,0,0,0.07)]"
+            style={{ transform: `translateX(${s.hidden + s.thumb}px)${s.flip}` }}
+          >
+            {THUMB}
+          </Art>
+        ))}
       </div>
     </button>
   );
