@@ -2,11 +2,11 @@ import type { PropGroup, PropRow } from "@/lib/props";
 
 function Table({ rows, caption }: { rows: PropRow[]; caption: string }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-black/10">
+    <div className="overflow-x-auto rounded-xl border border-black/[.08]">
       <table className="w-full min-w-[640px] border-collapse text-left text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead>
-          <tr className="border-b border-black/10 bg-black/[.02] text-xs uppercase tracking-wider text-stone-500">
+          <tr className="border-b border-black/[.08] text-xs text-stone-400">
             <th scope="col" className="px-4 py-2.5 font-medium">
               Prop
             </th>
@@ -23,7 +23,7 @@ function Table({ rows, caption }: { rows: PropRow[]; caption: string }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.name} className="border-b border-black/5 align-top last:border-0">
+            <tr key={row.name} className="border-b border-black/[.05] align-top last:border-0">
               <th scope="row" className="px-4 py-3 font-mono text-[13px] font-medium">
                 {row.name}
                 {row.required && <span className="text-red-600">*</span>}

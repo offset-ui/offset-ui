@@ -19,9 +19,9 @@ export async function CodeBlock({ code, title, className }: CodeBlockProps) {
     <div
       data-code
       data-expanded={long ? "false" : "true"}
-      className={cn("group/code overflow-hidden rounded-xl border border-black/10 bg-white text-stone-800", className)}
+      className={cn("group/code overflow-hidden rounded-xl border border-black/[.08] bg-white text-stone-800", className)}
     >
-      <div className="flex items-center justify-between border-b border-black/10 bg-stone-50 px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-black/[.08] px-4 py-2.5">
         <span className="truncate font-mono text-xs text-stone-500">{title}</span>
         <CopyButton />
       </div>

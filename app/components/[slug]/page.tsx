@@ -59,16 +59,14 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
   const index = COMPONENTS.findIndex((c) => c.slug === entry.slug);
   const [prev, next] = [COMPONENTS[index - 1], COMPONENTS[index + 1]];
   const code = "rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-xs";
-  const chip = "rounded-full border border-black/10 px-2.5 py-0.5 text-xs text-stone-600";
 
   return (
-    <article className="mx-auto max-w-4xl space-y-12 px-5 py-8 md:px-10 md:py-12">
+    <article className="mx-auto max-w-4xl space-y-16 px-5 py-10 md:px-10 md:py-14">
       <header className="space-y-3">
         <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{entry.category}</p>
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{entry.name}</h1>
-        <p className="max-w-2xl text-base leading-relaxed text-stone-600">{entry.description}</p>
+        <h1 className="text-3xl font-semibold tracking-[-0.03em] md:text-4xl">{entry.name}</h1>
+        <p className="max-w-2xl text-base leading-relaxed text-stone-500">{entry.description}</p>
         <div className="flex flex-wrap gap-2 pt-1">
-          <span className={chip}>MIT</span>
           {entry.isNew && <span className="rounded-full bg-[#F494BA]/25 px-2.5 py-0.5 text-xs font-medium text-pink-800">New</span>}
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-2">
@@ -78,7 +76,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
       </header>
 
       <section aria-labelledby="preview" className="space-y-4">
-        <h2 id="preview" className="text-xl font-semibold tracking-tight">
+        <h2 id="preview" className="text-lg font-medium tracking-tight">
           Preview
         </h2>
         <PreviewFrame slug={entry.slug} title={entry.name} height={entry.previewHeight}>
@@ -88,7 +86,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
 
       <section aria-labelledby="install" className="space-y-6">
         <div className="space-y-1">
-          <h2 id="install" className="text-xl font-semibold tracking-tight">
+          <h2 id="install" className="text-lg font-medium tracking-tight">
             Installation
           </h2>
           <p className="text-sm text-stone-600">
@@ -122,7 +120,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
       </section>
 
       <section aria-labelledby="usage" className="space-y-4">
-        <h2 id="usage" className="text-xl font-semibold tracking-tight">
+        <h2 id="usage" className="text-lg font-medium tracking-tight">
           Usage
         </h2>
         <CodeBlock code={entry.usage} title="app/page.tsx" />
@@ -131,7 +129,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
       {props.length > 0 && (
         <section aria-labelledby="props" className="space-y-4">
           <div className="space-y-1">
-            <h2 id="props" className="text-xl font-semibold tracking-tight">
+            <h2 id="props" className="text-lg font-medium tracking-tight">
               Props
             </h2>
             <p className="text-sm text-stone-600">Every prop is optional unless marked with a red asterisk.</p>
@@ -140,13 +138,13 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
         </section>
       )}
 
-      <nav aria-label="More components" className="grid gap-3 border-t border-black/10 pt-8 sm:grid-cols-2">
+      <nav aria-label="More components" className="grid gap-3 border-t border-black/[.08] pt-8 sm:grid-cols-2">
         {[prev && { c: prev, label: "Previous" }, next && { c: next, label: "Next" }].map((item, i) =>
           item ? (
             <Link
               key={item.c.slug}
               href={`/components/${item.c.slug}`}
-              className={`rounded-xl border border-black/10 p-4 outline-none transition-colors hover:bg-black/[.03] focus-visible:ring-2 focus-visible:ring-stone-400 ${i ? "sm:text-right" : ""}`}
+              className={`rounded-xl border border-black/[.08] p-4 outline-none transition-colors hover:bg-black/[.03] focus-visible:ring-2 focus-visible:ring-stone-400 ${i ? "sm:text-right" : ""}`}
             >
               <span className="block text-xs text-stone-500">{item.label}</span>
               <span className="font-medium">{item.c.name}</span>

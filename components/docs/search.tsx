@@ -56,7 +56,7 @@ export function Search({ items }: { items: SearchItem[] }) {
           setActive(0);
         }}
         onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
-        className="m-auto mt-[12vh] w-[min(560px,calc(100%-2rem))] rounded-2xl border border-black/10 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+        className="m-auto mt-[12vh] w-[min(560px,calc(100%-2rem))] rounded-2xl border border-black/[.08] bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/30 backdrop:backdrop-blur-sm"
       >
         <input
           autoFocus
@@ -73,7 +73,7 @@ export function Search({ items }: { items: SearchItem[] }) {
           }}
           placeholder="Search components…"
           aria-label="Search components"
-          className="w-full rounded-t-2xl border-b border-black/10 bg-transparent px-4 py-3.5 text-base outline-none placeholder:text-stone-400"
+          className="w-full rounded-t-2xl border-b border-black/[.08] bg-transparent px-4 py-3.5 text-base outline-none placeholder:text-stone-400"
         />
         <ul role="listbox" className="max-h-80 overflow-y-auto p-2">
           {results.map((item, i) => (

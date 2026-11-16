@@ -10,14 +10,11 @@ const GROUPS = COMPONENTS.reduce<Record<string, typeof COMPONENTS>>((groups, c) 
 export function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="border-b border-black/10 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r">
+    <aside className="border-b border-black/[.08] md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r">
       <nav aria-label="Components" className="flex gap-4 overflow-x-auto p-3 md:flex-col md:gap-6 md:overflow-x-visible md:p-5">
         {Object.entries(GROUPS).map(([category, items]) => (
           <div key={category} className="flex shrink-0 items-center gap-1 md:block md:space-y-1">
-            <p className="hidden items-center justify-between px-3 pb-1 text-xs font-medium uppercase tracking-wider text-stone-400 md:flex">
-              {category}
-              <span className="font-mono normal-case tracking-normal">{items.length}</span>
-            </p>
+            <p className="hidden px-3 pb-1 text-xs text-stone-400 md:block">{category}</p>
             {items.map((c) => {
               const active = pathname === `/components/${c.slug}`;
               return (

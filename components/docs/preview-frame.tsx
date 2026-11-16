@@ -18,8 +18,8 @@ export function PreviewFrame({ slug, title, height, children }: PreviewFrameProp
   const [run, setRun] = useState(0);
   const src = `/preview/${slug}`;
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/10 bg-white">
-      <div className="flex items-center justify-between border-b border-black/10 px-3 py-2">
+    <div className="overflow-hidden rounded-2xl border border-black/[.08] bg-white">
+      <div className="flex items-center justify-between border-b border-black/[.08] px-3 py-2">
         <div role="tablist" aria-label="View" className="flex gap-1 rounded-lg bg-black/[.05] p-0.5">
           {TABS.map((name) => (
             <button

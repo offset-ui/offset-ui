@@ -36,7 +36,7 @@ export function CollapseToggle() {
         const block = e.currentTarget.closest<HTMLElement>("[data-code]");
         if (block) block.dataset.expanded = block.dataset.expanded === "true" ? "false" : "true";
       }}
-      className="w-full border-t border-black/10 bg-stone-50 py-2.5 text-xs font-medium text-stone-500 outline-none transition-colors hover:bg-black/[.04] hover:text-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stone-400"
+      className="w-full border-t border-black/[.08] bg-stone-50 py-2.5 text-xs font-medium text-stone-500 outline-none transition-colors hover:bg-black/[.04] hover:text-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stone-400"
     >
       <span className="group-data-[expanded=true]/code:hidden">Show full code</span>
       <span className="hidden group-data-[expanded=true]/code:inline">Collapse</span>

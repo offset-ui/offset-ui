@@ -3,59 +3,53 @@ import { SITE } from "@/lib/site";
 
 const { x, instagram, email, portfolio } = SITE.socials;
 
-const COLUMNS = [
-  { title: "Library", links: [["All components", "/components"], ["Request a component", SITE.requestComponent]] },
-  { title: "Resources", links: [["Setup guide", "/components"], ["FAQ", "/faq"], ["GitHub", SITE.github]] },
-  { title: "Company", links: [["About", "/about"], ["Contact", "/contact"]] },
-  { title: "Legal", links: [["Terms", "/terms"], ["Privacy", "/privacy"]] },
-];
+const LINKS = (
+  [
+    ["Components", "/components"],
+    ["Request", SITE.requestComponent],
+    ["FAQ", "/faq"],
+    ["About", "/about"],
+    ["Contact", "/contact"],
+    ["Terms", "/terms"],
+    ["Privacy", "/privacy"],
+    ["GitHub", SITE.github],
+    ["X", x],
+    ["Instagram", instagram],
+    ["Email", email && `mailto:${email}`],
+    ["Portfolio", portfolio],
+  ] as [string, string][]
+).filter(([, href]) => href);
 
-const SOCIALS = [["X", x], ["Instagram", instagram], ["Email", email && `mailto:${email}`], ["Portfolio", portfolio]].filter(([, href]) => href);
-
-const LINK = "rounded-sm text-foreground/60 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/40";
+const LINK = "rounded-sm text-foreground/50 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/40";
 
 function FooterLink({ href, children }: { href: string; children: string }) {
   return href.startsWith("/") ? (
-    <Link href={href} className={LINK}>{children}</Link>
+    <Link href={href} className={LINK}>
+      {children}
+    </Link>
   ) : (
-    <a href={href} target={href.startsWith("mailto:") ? undefined : "_blank"} rel="noreferrer" className={LINK}>{children}</a>
+    <a href={href} target={href.startsWith("mailto:") ? undefined : "_blank"} rel="noreferrer" className={LINK}>
+      {children}
+    </a>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="relative z-10 mt-16 border-t border-foreground/10 px-4 py-10 text-sm md:px-6">
-      <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
-        <div className="space-y-3">
-          <p className="font-semibold">{SITE.name}</p>
-          <p className="max-w-xs text-pretty text-foreground/60">Figma-built React components with motion you&apos;ll remember. Copy the code, keep the feel.</p>
-          {SOCIALS.length > 0 && (
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
-              {SOCIALS.map(([name, href]) => (
-                <li key={name}><FooterLink href={href}>{name}</FooterLink></li>
-              ))}
-            </ul>
-          )}
-        </div>
-        {COLUMNS.map((column) => (
-          <nav key={column.title} aria-label={column.title} className="space-y-3">
-            <p className="font-medium">{column.title}</p>
-            <ul className="space-y-2">
-              {column.links.map(([name, href]) => (
-                <li key={name}><FooterLink href={href}>{name}</FooterLink></li>
-              ))}
-            </ul>
-          </nav>
-        ))}
-      </div>
-      <div className="mx-auto mt-10 flex max-w-7xl flex-col justify-between gap-2 border-t border-foreground/10 pt-6 font-mono text-xs text-foreground/50 sm:flex-row">
-        <p>
-          © {new Date().getFullYear()} {SITE.name} ·{" "}
-          <Link href="/about" className="underline-offset-2 hover:text-foreground hover:underline">
-            MIT licensed
-          </Link>
+    <footer className="mt-24 border-t border-black/[.08] px-4 py-8 text-sm md:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <p className="text-foreground/50">
+          © {new Date().getFullYear()} {SITE.name} · MIT licensed
         </p>
-        <p>Open source and built in public.</p>
+        <nav aria-label="Footer">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+            {LINKS.map(([name, href]) => (
+              <li key={name}>
+                <FooterLink href={href}>{name}</FooterLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </footer>
   );

@@ -17,7 +17,7 @@ type NewsletterProps = {
 export function Newsletter({ className, compact = false }: NewsletterProps) {
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
 
-  const frame = cn("rounded-2xl border border-black/10 bg-white/50", compact ? "p-3" : "p-6", className);
+  const frame = cn("rounded-2xl border border-black/[.08]", compact ? "p-3" : "p-6", className);
   const title = "Get the next component";
 
   if (!SITE.newsletter) {
@@ -74,7 +74,7 @@ export function Newsletter({ className, compact = false }: NewsletterProps) {
               required
               autoComplete="email"
               placeholder="you@example.com"
-              className="min-w-0 flex-1 rounded-full border border-black/15 bg-[#fcfcfb] px-4 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+              className="min-w-0 flex-1 rounded-full border border-black/[.1] bg-[#fcfcfb] px-4 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
             />
             {/* Honeypot */}
             <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/docs/footer";
+import { Topbar } from "@/components/docs/topbar";
+import { getStarCount } from "@/lib/github";
 import { PAGES } from "@/lib/pages";
 import { SITE } from "@/lib/site";
 
@@ -21,15 +21,12 @@ export default async function InfoPage({ params }: PageProps<"/[page]">) {
   const { page } = await params;
   const info = PAGES[page];
   if (!info) notFound();
+  const stars = await getStarCount();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="px-6 py-5 md:px-10">
-        <Link href="/" aria-label={SITE.name} className="inline-block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
-          <Image src="/brand/logo-complete-light.svg" alt="" width={118} height={26} />
-        </Link>
-      </header>
-      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
+      <Topbar stars={stars} />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
         <h1 className="text-4xl font-semibold tracking-tight">{info.title}</h1>
         <p className="mt-3 text-stone-600">{info.description}</p>
         {info.updated && <p className="mt-1 text-sm text-stone-500">Last updated {info.updated}</p>}

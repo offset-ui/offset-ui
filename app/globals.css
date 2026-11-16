@@ -2,9 +2,8 @@
 
 :root {
   color-scheme: light;
-  /* Warm off-white (stone-50) and near-black (stone-900): softer than pure #fff / #000. */
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #ffffff;
+  --foreground: #111111;
 }
 
 @theme inline {

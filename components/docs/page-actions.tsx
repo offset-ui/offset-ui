@@ -5,7 +5,7 @@ import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const pill =
-  "inline-flex items-center gap-2 rounded-full border border-black/10 px-3.5 py-1.5 text-xs font-medium text-stone-700 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400";
+  "inline-flex items-center gap-2 rounded-full border border-black/[.08] px-3.5 py-1.5 text-xs font-medium text-stone-700 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400";
 
 /** Briefly flips a label after an action, for copy buttons. */
 function useFlash(ms = 1800) {
