@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const button =
-  "rounded-md px-2.5 py-1 text-xs font-medium text-stone-300 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/60";
+  "rounded-md px-2.5 py-1 text-xs font-medium text-stone-600 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400";
 
 /** Copies the text of the nearest code block, read from the page so the code is not sent to the browser twice. */
 export function CopyButton() {
@@ -36,7 +36,7 @@ export function CollapseToggle() {
         const block = e.currentTarget.closest<HTMLElement>("[data-code]");
         if (block) block.dataset.expanded = block.dataset.expanded === "true" ? "false" : "true";
       }}
-      className="w-full border-t border-white/10 py-2.5 text-xs font-medium text-stone-400 outline-none transition-colors hover:bg-white/5 hover:text-stone-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/60"
+      className="w-full border-t border-black/10 bg-stone-50 py-2.5 text-xs font-medium text-stone-500 outline-none transition-colors hover:bg-black/[.04] hover:text-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stone-400"
     >
       <span className="group-data-[expanded=true]/code:hidden">Show full code</span>
       <span className="hidden group-data-[expanded=true]/code:inline">Collapse</span>

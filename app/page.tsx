@@ -1,97 +1,71 @@
-import type { CSSProperties, ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Footer } from "@/components/docs/footer";
-import { StarLink } from "@/components/docs/star-link";
-import { Checklist } from "@/components/ui/checklist";
-import { GrabToggle } from "@/components/ui/grab-toggle";
+import { Topbar } from "@/components/docs/topbar";
 import { getStarCount } from "@/lib/github";
+import { COMPONENTS } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 
-const squircle = { cornerShape: "squircle" } as CSSProperties;
-const TRUST = ["Accessible by default", "Respects reduced motion", "Copy, paste, own it"];
 const FOCUS = "outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-
-function Stage({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`relative ${className}`}>
-      <div aria-hidden className="absolute inset-0 translate-x-4 translate-y-4 rounded-[40px] bg-[#F494BA]" style={squircle} />
-      <div className="relative flex h-full items-center justify-center rounded-[40px] border border-black/5 bg-[#fcfcfb] p-10" style={squircle}>
-        {children}
-      </div>
-    </div>
-  );
-}
+const PILL = `whitespace-nowrap rounded-full text-sm font-medium transition-colors ${FOCUS}`;
 
 export default async function Home() {
   const stars = await getStarCount();
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-[-120px] size-[420px] -translate-x-1/2 rounded-full bg-[#F494BA]/15 md:top-[-160px] md:size-[760px] md:bg-[#F494BA]/20 blur-3xl" />
+    <div className="flex min-h-screen flex-col">
+      <Topbar stars={stars} contained />
 
-      <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
-        <Link href="/" aria-label={SITE.name} className={`rounded-md ${FOCUS}`}>
-          <Image src="/brand/logo-complete-light.svg" alt="" width={118} height={26} priority />
-        </Link>
-        <nav className="flex items-center gap-2 text-sm text-stone-700">
-          <Link href="/components" className={`rounded-full px-4 py-1.5 transition-colors hover:bg-black/5 ${FOCUS}`}>
-            Components
-          </Link>
-          <StarLink stars={stars} className="rounded-full border border-black/10 px-4 py-1.5 transition-colors hover:bg-black/5" />
-        </nav>
-      </header>
-
-      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center px-6 pb-20 pt-14 text-center md:pt-24">
-        <div className="flex flex-col items-center gap-8 motion-safe:animate-[rise_.7s_ease-out_both]">
-          <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/60 px-3.5 py-1.5 text-xs font-medium text-stone-600">
-            <span aria-hidden className="size-1.5 rounded-full bg-[#F494BA]" />
-            Open source · MIT
-          </span>
-
-          <h1 className="max-w-4xl text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.035em] md:text-7xl lg:text-8xl">
-            Make interfaces people want to{" "}
-            <span className="bg-[linear-gradient(transparent_62%,#F494BA_62%,#F494BA_92%,transparent_92%)] px-1">touch twice.</span>
-          </h1>
-
-          <p className="max-w-2xl text-balance text-lg leading-relaxed text-stone-600 md:text-xl">
-            Original components crafted by a designer, each with the prompt and the code to rebuild it in your AI agent of choice. MIT licensed. Free to use for personal and commercial use.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/components"
-              className={`whitespace-nowrap rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background shadow-[0_10px_24px_-10px_rgba(28,25,23,.6)] transition-transform hover:-translate-y-0.5 ${FOCUS}`}
-            >
-              Browse components
-            </Link>
-            <a
-              href={SITE.github}
-              target="_blank"
-              rel="noreferrer"
-              className={`whitespace-nowrap rounded-full border border-black/10 bg-white/60 px-7 py-3.5 text-sm font-medium text-stone-800 transition-colors hover:bg-white ${FOCUS}`}
-            >
-              ★ Star on GitHub
-            </a>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
+        <section className="relative overflow-hidden rounded-[28px] border border-black/10 bg-white px-6 py-20 text-center md:py-28">
+          <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 size-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F494BA]/30 blur-3xl" />
+          <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-7 motion-safe:animate-[rise_.7s_ease-out_both]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-stone-50 px-3.5 py-1.5 text-xs font-medium text-foreground/70">
+              <span aria-hidden className="size-1.5 rounded-full bg-[#F494BA]" />
+              Open source · MIT
+            </span>
+            <h1 className="text-balance text-5xl font-semibold leading-[1.04] tracking-[-0.035em] md:text-6xl lg:text-7xl">Make interfaces people want to touch twice.</h1>
+            <p className="max-w-2xl text-balance text-base leading-relaxed text-foreground/60 md:text-lg">
+              Original components crafted by a designer, each with the prompt and the code to rebuild it in your AI agent of choice. MIT licensed. Free to use for personal and commercial use.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link href="/components" className={`${PILL} bg-foreground px-6 py-3 text-background hover:bg-foreground/85`}>
+                Browse components →
+              </Link>
+              <a href={SITE.github} target="_blank" rel="noreferrer" className={`${PILL} border border-black/10 bg-white px-6 py-3 hover:bg-stone-50`}>
+                ★ Star on GitHub
+              </a>
+            </div>
           </div>
+        </section>
 
-          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-stone-600">
-            {TRUST.map((item) => (
-              <li key={item} className="flex items-center gap-2">
-                <span aria-hidden className="size-1.5 rounded-full bg-[#F494BA]" />
-                {item}
+        <section aria-labelledby="all" className="mt-16">
+          <div className="mb-6 flex items-baseline justify-between">
+            <h2 id="all" className="text-xl font-semibold tracking-tight">
+              All components
+            </h2>
+            <span className="font-mono text-xs text-foreground/50">{COMPONENTS.length} components</span>
+          </div>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {COMPONENTS.map((c) => (
+              <li key={c.slug}>
+                <Link
+                  href={`/components/${c.slug}`}
+                  className={`group block rounded-[22px] bg-white p-2 ring-1 ring-black/[.07] transition hover:-translate-y-0.5 hover:ring-black/20 ${FOCUS}`}
+                >
+                  <div aria-hidden className="relative h-60 overflow-hidden rounded-2xl bg-[#fafaf9] ring-1 ring-black/[.05]">
+                    <iframe src={`/preview/${c.slug}`} scrolling="no" title="" tabIndex={-1} loading="lazy" className="pointer-events-none absolute left-0 top-0 h-[200%] w-[200%] origin-top-left scale-50 border-0" />
+                  </div>
+                  <div className="space-y-1 px-3 pb-3 pt-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{c.name}</h3>
+                      {c.isNew && <span className="rounded-full bg-[#F494BA]/20 px-2 py-0.5 text-[10px] font-medium text-pink-700">New</span>}
+                    </div>
+                    <p className="line-clamp-2 text-sm leading-relaxed text-foreground/55">{c.description}</p>
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>
-        </div>
-
-        <div className="mt-20 grid w-full max-w-3xl gap-10 motion-safe:animate-[rise_.7s_.12s_ease-out_both] sm:grid-cols-[1.15fr_1fr] sm:gap-12">
-          <Stage>
-            <Checklist />
-          </Stage>
-          <Stage className="min-h-56">
-            <GrabToggle size="large" />
-          </Stage>
-        </div>
+        </section>
       </main>
 
       <Footer />

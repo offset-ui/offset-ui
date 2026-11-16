@@ -1,5 +1,6 @@
 export type ComponentEntry = {
   slug: string;
+  category: string;
   name: string;
   description: string;
   /** Component source, relative to the project root. */
@@ -22,6 +23,7 @@ export type ComponentEntry = {
 export const COMPONENTS: ComponentEntry[] = [
   {
     slug: "imposter-captcha",
+    category: "Forms & Inputs",
     name: "Imposter Captcha",
     description: "A whack-the-imposter verification game: catch the imposters before the timer runs out, then watch the keys collapse into a verified reveal.",
     file: "components/ui/imposter-captcha.tsx",
@@ -56,6 +58,7 @@ export const COMPONENTS: ComponentEntry[] = [
   },
   {
     slug: "memory-camera",
+    category: "Playful",
     name: "Memory Camera",
     description: "A retro camera that prints a stamp-cutout memory on every shutter tap, with a flash, recoil, cursor tilt and a scrapbook row.",
     file: "components/ui/memory-camera.tsx",
@@ -85,6 +88,7 @@ export const COMPONENTS: ComponentEntry[] = [
   },
   {
     slug: "checklist",
+    category: "Forms & Inputs",
     name: "Checklist",
     description: "A hand-drawn check-off list: the tick draws itself, a pen scribble strikes the task, and unchecking dissolves it into particles.",
     file: "components/ui/checklist.tsx",
@@ -114,6 +118,7 @@ export const COMPONENTS: ComponentEntry[] = [
   },
   {
     slug: "proximity-scroll-indicator",
+    category: "Navigation",
     name: "Proximity Scroll Indicator",
     description: "A tiny progress ring that expands into a section navigator, with a hover zoom that follows the cursor.",
     file: "components/ui/proximity-scroll-indicator.tsx",
@@ -139,6 +144,7 @@ export const COMPONENTS: ComponentEntry[] = [
   },
   {
     slug: "isometric-keyboard",
+    category: "Playful",
     name: "Isometric Keyboard",
     description: "An isometric keyboard whose keys press in a wave that follows the cursor.",
     file: "components/ui/isometric-keyboard.tsx",
@@ -158,6 +164,7 @@ export const COMPONENTS: ComponentEntry[] = [
   },
   {
     slug: "dynamic-metrics-chart",
+    category: "Data",
     name: "Dynamic Metrics Chart",
     description: "A sales and units chart with timeframe tabs, animated bars and a built-in empty state.",
     file: "components/ui/dynamic-metrics-chart.tsx",
@@ -196,6 +203,7 @@ const frames: MetricsFrame[] = [
   },
   {
     slug: "share-panel",
+    category: "Forms & Inputs",
     name: "Share Panel",
     description: "A share dialog with copy link, an anyone-with-the-link switch and an invite list with animated rows.",
     file: "components/ui/share-panel.tsx",
@@ -223,6 +231,7 @@ const frames: MetricsFrame[] = [
   },
   {
     slug: "grab-toggle",
+    category: "Forms & Inputs",
     name: "Grab Toggle",
     description: "A switch where a cartoon hand reaches in, grabs the knob and drags it across.",
     file: "components/ui/grab-toggle.tsx",

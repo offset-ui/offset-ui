@@ -12,7 +12,7 @@ const COLUMNS = [
 
 const SOCIALS = [["X", x], ["Instagram", instagram], ["Email", email && `mailto:${email}`], ["Portfolio", portfolio]].filter(([, href]) => href);
 
-const LINK = "rounded-sm text-stone-600 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-stone-400";
+const LINK = "rounded-sm text-foreground/60 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/40";
 
 function FooterLink({ href, children }: { href: string; children: string }) {
   return href.startsWith("/") ? (
@@ -24,11 +24,11 @@ function FooterLink({ href, children }: { href: string; children: string }) {
 
 export function Footer() {
   return (
-    <footer className="relative z-10 mt-16 border-t border-black/10 px-6 py-12 text-sm md:px-10">
+    <footer className="relative z-10 mt-16 border-t border-foreground/10 px-6 py-12 text-sm md:px-10">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
         <div className="space-y-3">
           <p className="font-semibold">{SITE.name}</p>
-          <p className="max-w-xs text-pretty text-stone-600">Figma-built React components with motion you&apos;ll remember. Copy the code, keep the feel.</p>
+          <p className="max-w-xs text-pretty text-foreground/60">Figma-built React components with motion you&apos;ll remember. Copy the code, keep the feel.</p>
           {SOCIALS.length > 0 && (
             <ul className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
               {SOCIALS.map(([name, href]) => (
@@ -48,7 +48,7 @@ export function Footer() {
           </nav>
         ))}
       </div>
-      <div className="mx-auto mt-12 flex max-w-6xl flex-col justify-between gap-2 text-xs text-stone-500 sm:flex-row">
+      <div className="mx-auto mt-12 flex max-w-6xl flex-col justify-between gap-2 text-xs text-foreground/50 sm:flex-row">
         <p>
           © {new Date().getFullYear()} {SITE.name} ·{" "}
           <Link href="/about" className="underline-offset-2 hover:text-foreground hover:underline">
