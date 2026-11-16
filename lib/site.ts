@@ -10,5 +10,6 @@ export const SITE = {
   install: "npm install motion clsx tailwind-merge",
   /** Your Buttondown username (buttondown.com). Leave empty until the account exists: the box then links to GitHub releases. */
   newsletter: "",
+  creator: { handle: "adityaarora", url: "" },
   socials: { x: "", instagram: "", email: "", portfolio: "" },
 };

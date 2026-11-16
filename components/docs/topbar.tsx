@@ -1,31 +1,57 @@
 import Image from "next/image";
 import Link from "next/link";
+import { formatCount } from "@/lib/format";
 import { COMPONENTS } from "@/lib/registry";
 import { SITE } from "@/lib/site";
+import { cn } from "@/lib/utils";
 import { Search } from "./search";
-import { StarLink } from "./star-link";
 
 const ITEMS = COMPONENTS.map(({ slug, name, description, category }) => ({ slug, name, description, category }));
-const LINK = "rounded-full px-3.5 py-1.5 text-sm text-stone-700 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400";
+const { handle, url } = SITE.creator;
+const FOCUS = "outline-none focus-visible:ring-2 focus-visible:ring-stone-400";
+
+function GithubMark() {
+  return (
+    <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+    </svg>
+  );
+}
 
 export function Topbar({ stars, contained = false }: { stars: number | null; contained?: boolean }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-black/10 bg-background/85 backdrop-blur">
-      <div className={`flex h-14 items-center gap-3 px-4 md:px-6 ${contained ? "mx-auto max-w-6xl" : ""}`}>
-        <Link href="/" aria-label={SITE.name} className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
-          <Image src="/brand/logo-complete-light.svg" alt="" width={110} height={24} priority />
-        </Link>
-        <div className="ml-auto flex items-center gap-1 sm:ml-4 sm:flex-1">
-          <Search items={ITEMS} />
-          <div className="ml-auto flex items-center gap-1">
-            <Link href="/components" className={`${LINK} hidden md:block`}>
-              Components
-            </Link>
-            <a href={SITE.requestComponent} target="_blank" rel="noreferrer" className={`${LINK} hidden md:block`}>
-              Request
-            </a>
-            <StarLink stars={stars} className="rounded-full border border-black/10 px-3.5 py-1.5 text-sm text-stone-700 transition-colors hover:bg-black/5" />
-          </div>
+    <header className="sticky top-0 z-30 border-b border-black/[.06] bg-background/85 backdrop-blur">
+      <div className={cn("grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:px-6", contained && "mx-auto max-w-7xl")}>
+        <div className="flex items-center gap-4">
+          <Link href="/" aria-label={SITE.name} className={cn("rounded-md", FOCUS)}>
+            <Image src="/brand/logo-complete-light.svg" alt="" width={110} height={24} priority />
+          </Link>
+          <p className="hidden text-sm text-stone-500 lg:block">
+            Created by{" "}
+            {url ? (
+              <a href={url} target="_blank" rel="noreferrer" className={cn("rounded-sm font-medium text-foreground hover:underline", FOCUS)}>
+                @{handle}
+              </a>
+            ) : (
+              <span className="font-medium text-foreground">@{handle}</span>
+            )}
+          </p>
+          <Link href="/components" className={cn("hidden rounded-sm text-sm text-stone-600 transition-colors hover:text-foreground md:block", FOCUS)}>
+            Docs
+          </Link>
+        </div>
+        <Search items={ITEMS} />
+        <div className="flex justify-end">
+          <a
+            href={SITE.github}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={stars ? `GitHub, ${stars} stars` : "GitHub"}
+            className={cn("flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-stone-600 transition-colors hover:bg-black/5 hover:text-foreground", FOCUS)}
+          >
+            <GithubMark />
+            {stars ? <span className="tabular-nums">{formatCount(stars)}</span> : null}
+          </a>
         </div>
       </div>
     </header>

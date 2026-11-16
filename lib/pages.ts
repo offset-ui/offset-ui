@@ -43,7 +43,7 @@ export const PAGES: Record<string, InfoPage> = {
       },
       {
         heading: "Built in public",
-        text: ["The code, the issues and the roadmap live on GitHub. If something is missing or broken, or you want a component, tell us there."],
+        text: ["The code, the issues and the roadmap live on GitHub. If something is missing or broken, or you want a component, tell us there.", "The people in the home page illustration come from Open Peeps by Pablo Stanley, released into the public domain under CC0."],
         links: [["Request a component", SITE.requestComponent]],
       },
     ],

@@ -24,8 +24,8 @@ function FooterLink({ href, children }: { href: string; children: string }) {
 
 export function Footer() {
   return (
-    <footer className="relative z-10 mt-16 border-t border-foreground/10 px-6 py-12 text-sm md:px-10">
-      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
+    <footer className="relative z-10 mt-16 border-t border-foreground/10 px-4 py-10 text-sm md:px-6">
+      <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
         <div className="space-y-3">
           <p className="font-semibold">{SITE.name}</p>
           <p className="max-w-xs text-pretty text-foreground/60">Figma-built React components with motion you&apos;ll remember. Copy the code, keep the feel.</p>
@@ -48,7 +48,7 @@ export function Footer() {
           </nav>
         ))}
       </div>
-      <div className="mx-auto mt-12 flex max-w-6xl flex-col justify-between gap-2 text-xs text-foreground/50 sm:flex-row">
+      <div className="mx-auto mt-10 flex max-w-7xl flex-col justify-between gap-2 border-t border-foreground/10 pt-6 font-mono text-xs text-foreground/50 sm:flex-row">
         <p>
           © {new Date().getFullYear()} {SITE.name} ·{" "}
           <Link href="/about" className="underline-offset-2 hover:text-foreground hover:underline">

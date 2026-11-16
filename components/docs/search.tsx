@@ -37,14 +37,14 @@ export function Search({ items }: { items: SearchItem[] }) {
       <button
         type="button"
         onClick={() => dialog.current?.showModal()}
-        className="flex h-9 items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 text-sm text-stone-500 outline-none transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-stone-400 sm:w-64"
+        className="flex h-9 items-center gap-2 rounded-full bg-black/[.05] px-3 text-sm text-stone-500 outline-none transition-colors hover:bg-black/[.08] focus-visible:ring-2 focus-visible:ring-stone-400 sm:w-72"
       >
         <svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
           <circle cx="7" cy="7" r="4.5" />
           <path d="m10.5 10.5 3 3" />
         </svg>
         <span className="hidden flex-1 text-left sm:block">Search components…</span>
-        <kbd className="hidden rounded border border-black/10 px-1.5 font-sans text-[11px] sm:block">Ctrl K</kbd>
+        <kbd className="hidden rounded bg-black/[.06] px-1.5 font-sans text-[11px] sm:block">Ctrl K</kbd>
         <span className="sr-only sm:hidden">Search components</span>
       </button>
 

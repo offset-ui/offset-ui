@@ -30,3 +30,23 @@ body {
     transform: none;
   }
 }
+
+.card-in {
+  animation: rise 0.6s ease-out both;
+  animation-delay: calc(min(var(--i, 0), 7) * 70ms);
+}
+
+@supports (animation-timeline: view()) {
+  .card-in:nth-child(n + 5) {
+    animation: rise linear both;
+    animation-delay: 0s;
+    animation-timeline: view();
+    animation-range: entry 0% entry 60%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-in {
+    animation: none !important;
+  }
+}
