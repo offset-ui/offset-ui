@@ -214,7 +214,7 @@ export function MemoryCamera({
     if (busy.current || done) return;
     busy.current = true;
     if (!reduce) {
-      animate(shutter.current!, { scale: 0.92, y: 2 }, PRESS).then(() => animate(shutter.current!, { scale: 1, y: 0 }, PRESS));
+      animate(shutter.current!, { scale: 0.92, y: 2 }, PRESS).then(() => shutter.current && animate(shutter.current, { scale: 1, y: 0 }, PRESS));
       animate(camera.current!, { scale: [1, 0.988, 1], y: [0, 4, 0] }, { duration: 0.45, ease: "easeOut" });
       animate(flash.current!, { opacity: [0, 0.95, 0] }, { duration: FLASH, times: [0, 0.18, 1], ease: "easeOut" });
     }
@@ -297,9 +297,9 @@ export function MemoryCamera({
           <motion.button
             type="button"
             onClick={capture}
-            disabled={done}
+            aria-disabled={done}
             aria-label={done ? "All memories collected" : "Take a photo"}
-            className="absolute z-30 cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#008cff] focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+            className="absolute z-30 cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#008cff] focus-visible:ring-offset-2 aria-disabled:cursor-not-allowed"
             style={{ left: SHUTTER.x + cameraLeft, top: SHUTTER.y, width: SHUTTER.w, height: SHUTTER.h, ...tiltStyle(SHUTTER.x + cameraLeft, SHUTTER.y) }}
           />
         </div>

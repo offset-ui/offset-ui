@@ -1,33 +1,29 @@
+import { notFound } from "next/navigation";
+
 export type ComponentEntry = {
   slug: string;
   category: string;
   name: string;
   description: string;
-  /** Component source, relative to the project root. */
   file: string;
-  /** Folder in /public the component needs (artwork), if any. */
   assets?: string;
-  /** Height of the preview window in px. */
   previewHeight: number;
   isNew?: boolean;
-  /** Short usage example shown under the code. */
   usage: string;
-  /** Extra requirements worth knowing before copying. */
   notes?: string[];
-  /** One line per prop (or group key), shown in the props table. */
   propDocs?: Record<string, string>;
 };
 
+type Entry = Omit<ComponentEntry, "file" | "assets"> & { assets?: true };
+export type NavItem = Pick<ComponentEntry, "slug" | "name" | "description" | "category" | "isNew">;
 
-/** Newest first. Add a component here and it appears in the sidebar, docs page and preview. */
-export const COMPONENTS: ComponentEntry[] = [
+const ENTRIES: Entry[] = [
   {
     slug: "imposter-captcha",
     category: "Forms & Inputs",
     name: "Imposter Captcha",
     description: "A whack-the-imposter verification game: catch the imposters before the timer runs out, then watch the keys collapse into a verified reveal.",
-    file: "components/ui/imposter-captcha.tsx",
-    assets: "public/imposter-captcha",
+    assets: true,
     previewHeight: 600,
     isNew: true,
     propDocs: {
@@ -61,8 +57,7 @@ export const COMPONENTS: ComponentEntry[] = [
     category: "Playful",
     name: "Memory Camera",
     description: "A retro camera that prints a stamp-cutout memory on every shutter tap, with a flash, recoil, cursor tilt and a scrapbook row.",
-    file: "components/ui/memory-camera.tsx",
-    assets: "public/memory-camera",
+    assets: true,
     previewHeight: 760,
     isNew: true,
     propDocs: {
@@ -91,7 +86,6 @@ export const COMPONENTS: ComponentEntry[] = [
     category: "Forms & Inputs",
     name: "Checklist",
     description: "A hand-drawn check-off list: the tick draws itself, a pen scribble strikes the task, and unchecking dissolves it into particles.",
-    file: "components/ui/checklist.tsx",
     propDocs: {
       items: "The tasks, each with a unique id and a label. Add disabled: true to lock one.",
       checked: "Controls which ids are checked. Leave it out to let the list manage itself.",
@@ -121,7 +115,6 @@ export const COMPONENTS: ComponentEntry[] = [
     category: "Navigation",
     name: "Proximity Scroll Indicator",
     description: "A tiny progress ring that expands into a section navigator, with a hover zoom that follows the cursor.",
-    file: "components/ui/proximity-scroll-indicator.tsx",
     propDocs: {
       sections: "The headings to track, each with the id of an element on the page and a label.",
       colors: "Card and ring colours; the track and text colours are derived.",
@@ -147,7 +140,6 @@ export const COMPONENTS: ComponentEntry[] = [
     category: "Playful",
     name: "Isometric Keyboard",
     description: "An isometric keyboard whose keys press in a wave that follows the cursor.",
-    file: "components/ui/isometric-keyboard.tsx",
     propDocs: {
       theme: "Force light or dark. Leave it out to follow the page theme.",
       colors: "Surface and accent colours; the key outlines are derived from them.",
@@ -167,7 +159,6 @@ export const COMPONENTS: ComponentEntry[] = [
     category: "Data",
     name: "Dynamic Metrics Chart",
     description: "A sales and units chart with timeframe tabs, animated bars and a built-in empty state.",
-    file: "components/ui/dynamic-metrics-chart.tsx",
     previewHeight: 640,
     propDocs: {
       title: "Heading of the card.",
@@ -206,8 +197,7 @@ const frames: MetricsFrame[] = [
     category: "Forms & Inputs",
     name: "Share Panel",
     description: "A share dialog with copy link, an anyone-with-the-link switch and an invite list with animated rows.",
-    file: "components/ui/share-panel.tsx",
-    assets: "public/share-panel",
+    assets: true,
     propDocs: {
       title: "Heading of the panel.",
       link: "The link that is shown and copied.",
@@ -234,7 +224,6 @@ const frames: MetricsFrame[] = [
     category: "Forms & Inputs",
     name: "Grab Toggle",
     description: "A switch where a cartoon hand reaches in, grabs the knob and drags it across.",
-    file: "components/ui/grab-toggle.tsx",
     propDocs: {
       size: "Small, medium or large.",
       checked: "Controlled value. Leave it out to let the switch manage itself.",
@@ -258,4 +247,18 @@ const frames: MetricsFrame[] = [
   },
 ];
 
+export const COMPONENTS: ComponentEntry[] = ENTRIES.map((entry) => ({ ...entry, file: `components/ui/${entry.slug}.tsx`, assets: entry.assets && `public/${entry.slug}` }));
+
+export const NAV: NavItem[] = COMPONENTS.map(({ slug, name, description, category, isNew }) => ({ slug, name, description, category, isNew }));
+
+export const NAV_GROUPS = Object.entries(NAV.reduce<Record<string, NavItem[]>>((groups, item) => ({ ...groups, [item.category]: [...(groups[item.category] ?? []), item] }), {}));
+
 export const getComponent = (slug: string) => COMPONENTS.find((c) => c.slug === slug);
+
+export function requireComponent(slug: string) {
+  const entry = getComponent(slug);
+  if (!entry) notFound();
+  return entry;
+}
+
+export const componentParams = () => COMPONENTS.map((c) => ({ slug: c.slug }));

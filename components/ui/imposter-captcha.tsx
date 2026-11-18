@@ -202,6 +202,8 @@ function Key({ index, assetPath, raised, carriesImposter, collapsed, collapseDel
       <motion.button
         type="button"
         aria-label={`Key ${label ?? index + 1}${raised ? ", imposter here" : ""}`}
+        aria-hidden={collapsed || undefined}
+        tabIndex={collapsed ? -1 : undefined}
         className={cn("absolute cursor-pointer rounded-[13px] outline-none", RING)}
         style={{ left: 0, top: 49, width: KEY_W, height: KEYCAP_H, transformOrigin: "50% 100%", ...squircle }}
         initial={false}
@@ -459,6 +461,7 @@ export function ImposterCaptcha({
               className="absolute flex items-center"
               style={{ left: 12, top: SLOT_Y, height: 51, gap: 10 }}
               initial={false}
+              aria-hidden={!(phase === "playing" && timed)}
               animate={{ opacity: phase === "playing" && timed ? 1 : 0 }}
               transition={t({ duration: 0.2 })}
             >

@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import ts from "typescript";
+import type { ComponentEntry } from "@/lib/registry";
+import { readSource } from "@/lib/source";
 
 export type PropRow = {
   name: string;
@@ -10,7 +10,6 @@ export type PropRow = {
   description: string;
 };
 
-/** A grouped prop such as `colors`, expanded into its keys. */
 export type PropGroup = {
   prop: string;
   rows: PropRow[];
@@ -21,15 +20,6 @@ const collapse = (text: string, max = 70) => {
   return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat;
 };
 
-const docOf = (node: ts.Node) =>
-  ts
-    .getJSDocCommentsAndTags(node)
-    .filter(ts.isJSDoc)
-    .map((doc) => ts.getTextOfJSDocComment(doc.comment) ?? "")
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-
 const memberName = (member: ts.TypeElement) => (member.name ? member.name.getText() : "");
 
 function findTypeMembers(source: ts.SourceFile, typeName: string): ts.NodeArray<ts.TypeElement> | undefined {
@@ -39,7 +29,6 @@ function findTypeMembers(source: ts.SourceFile, typeName: string): ts.NodeArray<
   }
 }
 
-/** Shows the value behind a top-level constant default (for example `ITEMS`) instead of its name. */
 function resolveConst(source: ts.SourceFile, text: string): string {
   if (!/^[A-Z][A-Z0-9_]*$/.test(text)) return text;
   for (const stmt of source.statements) {
@@ -51,7 +40,6 @@ function resolveConst(source: ts.SourceFile, text: string): string {
   return text;
 }
 
-/** Reads `const X: TypeName = { ... }` and returns each property's source text. */
 function findObjectDefaults(source: ts.SourceFile, typeName: string): Map<string, string> {
   const out = new Map<string, string>();
   for (const stmt of source.statements) {
@@ -66,31 +54,25 @@ function findObjectDefaults(source: ts.SourceFile, typeName: string): Map<string
   return out;
 }
 
-function toRows(members: ts.NodeArray<ts.TypeElement>, defaults: Map<string, string>): PropRow[] {
+function toRows(members: ts.NodeArray<ts.TypeElement>, defaults: Map<string, string>, docs: Record<string, string>): PropRow[] {
   return members.filter(ts.isPropertySignature).map((member) => ({
     name: memberName(member),
     type: collapse(member.type?.getText() ?? "unknown", 90),
     required: !member.questionToken,
     default: defaults.get(memberName(member)),
-    description: docOf(member),
+    description: docs[memberName(member)] ?? "",
   }));
 }
 
-/**
- * Builds the props documentation for a component file from its source, so the docs never drift:
- * the exported `*Props` type gives names, types and comments, the function's destructuring gives defaults.
- */
-export function extractProps(file: string): { props: PropRow[]; groups: PropGroup[] } {
-  const text = readFileSync(path.join(/* turbopackIgnore: true */ process.cwd(), file), "utf8");
-  const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+export function getProps(entry: Pick<ComponentEntry, "file" | "propDocs">): { props: PropRow[]; groups: PropGroup[] } {
+  const docs = entry.propDocs ?? {};
+  const source = ts.createSourceFile(entry.file, readSource(entry.file), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
   const propsType = source.statements
     .filter((s): s is ts.TypeAliasDeclaration | ts.InterfaceDeclaration => ts.isTypeAliasDeclaration(s) || ts.isInterfaceDeclaration(s))
     .find((s) => s.name.text.endsWith("Props"));
-  if (!propsType) return { props: [], groups: [] };
-
-  const members = findTypeMembers(source, propsType.name.text);
-  if (!members) return { props: [], groups: [] };
+  const members = propsType && findTypeMembers(source, propsType.name.text);
+  if (!propsType || !members) return { props: [], groups: [] };
 
   const defaults = new Map<string, string>();
   for (const stmt of source.statements) {
@@ -102,15 +84,22 @@ export function extractProps(file: string): { props: PropRow[]; groups: PropGrou
     }
   }
 
-  const props = toRows(members, defaults);
+  const props = toRows(members, defaults, docs);
 
   const groups: PropGroup[] = [];
   for (const member of members.filter(ts.isPropertySignature)) {
     const typeText = member.type?.getText() ?? "";
     const named = /^Partial<(\w+)>/.exec(typeText) ?? /keyof (\w+)\]/.exec(typeText);
     const groupMembers = named && findTypeMembers(source, named[1]);
-    if (named && groupMembers) groups.push({ prop: memberName(member), rows: toRows(groupMembers, findObjectDefaults(source, named[1])).map((row) => ({ ...row, required: false })) });
+    if (named && groupMembers) {
+      const rows = toRows(groupMembers, findObjectDefaults(source, named[1]), docs).map((row) => ({ ...row, required: false }));
+      groups.push({ prop: memberName(member), rows });
+    }
   }
+
+  const known = new Set([...props, ...groups.flatMap((g) => g.rows)].map((row) => row.name));
+  const stale = Object.keys(docs).filter((key) => !known.has(key));
+  if (stale.length) throw new Error(`propDocs for ${entry.file} mention props that do not exist: ${stale.join(", ")}`);
 
   return { props, groups };
 }

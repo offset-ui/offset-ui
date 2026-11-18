@@ -1,14 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatCount } from "@/lib/format";
-import { COMPONENTS } from "@/lib/registry";
+import { getStarCount } from "@/lib/github";
+import { NAV } from "@/lib/registry";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { Search } from "./search";
 
-const ITEMS = COMPONENTS.map(({ slug, name, description, category }) => ({ slug, name, description, category }));
 const { handle, url } = SITE.creator;
-const FOCUS = "outline-none focus-visible:ring-2 focus-visible:ring-stone-400";
 
 function GithubMark() {
   return (
@@ -18,36 +17,37 @@ function GithubMark() {
   );
 }
 
-export function Topbar({ stars, contained = false }: { stars: number | null; contained?: boolean }) {
+export async function Topbar({ contained = false }: { contained?: boolean }) {
+  const stars = await getStarCount();
   return (
     <header className="sticky top-0 z-30 border-b border-black/[.06] bg-background/85 backdrop-blur">
-      <div className={cn("grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:px-6", contained && "mx-auto max-w-7xl")}>
+      <div className={cn("grid h-(--topbar-h) grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:px-6", contained && "mx-auto max-w-7xl")}>
         <div className="flex items-center gap-4">
-          <Link href="/" aria-label={SITE.name} className={cn("rounded-md", FOCUS)}>
+          <Link href="/" aria-label={SITE.name} className={cn("rounded-md", "focus-ring")}>
             <Image src="/brand/logo-complete-light.svg" alt="" width={110} height={24} priority />
           </Link>
           <p className="hidden text-sm text-stone-500 lg:block">
             Created by{" "}
             {url ? (
-              <a href={url} target="_blank" rel="noreferrer" className={cn("rounded-sm font-medium text-foreground hover:underline", FOCUS)}>
+              <a href={url} target="_blank" rel="noreferrer" className={cn("rounded-sm font-medium text-foreground hover:underline", "focus-ring")}>
                 @{handle}
               </a>
             ) : (
               <span className="font-medium text-foreground">@{handle}</span>
             )}
           </p>
-          <Link href="/components" className={cn("hidden rounded-sm text-sm text-stone-600 transition-colors hover:text-foreground md:block", FOCUS)}>
+          <Link href="/components" className={cn("hidden rounded-sm text-sm text-stone-600 transition-colors hover:text-foreground md:block", "focus-ring")}>
             Docs
           </Link>
         </div>
-        <Search items={ITEMS} />
+        <Search items={NAV} />
         <div className="flex justify-end">
           <a
             href={SITE.github}
             target="_blank"
             rel="noreferrer"
             aria-label={stars ? `GitHub, ${stars} stars` : "GitHub"}
-            className={cn("flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-stone-600 transition-colors hover:bg-black/5 hover:text-foreground", FOCUS)}
+            className={cn("flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-stone-600 transition-colors hover:bg-black/5 hover:text-foreground", "focus-ring")}
           >
             <GithubMark />
             {stars ? <span className="tabular-nums">{formatCount(stars)}</span> : null}

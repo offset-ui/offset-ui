@@ -64,12 +64,13 @@ Open <http://localhost:3000>. Other scripts: `npm run lint`, `npm run typecheck`
 app/                  docs site (home, /components/[slug]) and /preview/[slug] demo pages
 components/ui/        the components (one file each)
 components/docs/      docs site UI (sidebar, code block, preview frame)
-lib/registry.ts       list of components shown on the docs site
+lib/registry.ts       list of components shown on the docs site, with their prop descriptions
 lib/site.ts           name, tagline and links
+scripts/              build-crowd.mjs regenerates the home page illustration (npm run crowd)
 public/               artwork used by some components
 ```
 
-To add a component, put the file in `components/ui`, add a demo page in `app/preview/<slug>/page.tsx`, and add an entry to `lib/registry.ts`. See [CONTRIBUTING.md](CONTRIBUTING.md).
+To add a component, put the file in `components/ui`, add a demo page in `app/preview/<slug>/page.tsx`, and add an entry to `lib/registry.ts` (the file path and artwork folder are derived from the slug). See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Bonus: a code-audit skill
 

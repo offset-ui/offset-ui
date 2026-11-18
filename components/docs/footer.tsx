@@ -1,10 +1,7 @@
-import Link from "next/link";
-import { SITE } from "@/lib/site";
+import { SITE, SOCIAL_LINKS } from "@/lib/site";
+import { SmartLink } from "./smart-link";
 
-const { x, instagram, email, portfolio } = SITE.socials;
-
-const LINKS = (
-  [
+const LINKS: [string, string][] = [
     ["Components", "/components"],
     ["Request", SITE.requestComponent],
     ["FAQ", "/faq"],
@@ -13,26 +10,10 @@ const LINKS = (
     ["Terms", "/terms"],
     ["Privacy", "/privacy"],
     ["GitHub", SITE.github],
-    ["X", x],
-    ["Instagram", instagram],
-    ["Email", email && `mailto:${email}`],
-    ["Portfolio", portfolio],
-  ] as [string, string][]
-).filter(([, href]) => href);
+    ...SOCIAL_LINKS,
+];
 
 const LINK = "rounded-sm text-foreground/50 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/40";
-
-function FooterLink({ href, children }: { href: string; children: string }) {
-  return href.startsWith("/") ? (
-    <Link href={href} className={LINK}>
-      {children}
-    </Link>
-  ) : (
-    <a href={href} target={href.startsWith("mailto:") ? undefined : "_blank"} rel="noreferrer" className={LINK}>
-      {children}
-    </a>
-  );
-}
 
 export function Footer() {
   return (
@@ -45,7 +26,7 @@ export function Footer() {
           <ul className="flex flex-wrap gap-x-6 gap-y-2">
             {LINKS.map(([name, href]) => (
               <li key={name}>
-                <FooterLink href={href}>{name}</FooterLink>
+                <SmartLink href={href} className={LINK}>{name}</SmartLink>
               </li>
             ))}
           </ul>

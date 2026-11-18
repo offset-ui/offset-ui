@@ -22,7 +22,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "crowd": "node scripts/build-crowd.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -40,6 +41,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "svg-path-bbox": "^2.1.0",
+    "svgo": "^4.1.0",
+    "svgpath": "^2.6.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

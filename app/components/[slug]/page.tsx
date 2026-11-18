@@ -1,35 +1,24 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/docs/code-block";
+import { NewBadge } from "@/components/docs/new-badge";
 import { Newsletter } from "@/components/docs/newsletter";
 import { CopyForAi, ShareLinks } from "@/components/docs/page-actions";
 import { PreviewFrame } from "@/components/docs/preview-frame";
 import { PropsTable } from "@/components/docs/props-table";
-import { extractProps } from "@/lib/props";
-import { COMPONENTS, getComponent } from "@/lib/registry";
+import { getProps } from "@/lib/props";
+import { COMPONENTS, componentParams, requireComponent } from "@/lib/registry";
+import { componentPath } from "@/lib/routes";
+import { describeSetup } from "@/lib/setup";
 import { SITE } from "@/lib/site";
 
-const read = (file: string) => readFileSync(path.join(/* turbopackIgnore: true */ process.cwd(), file), "utf8");
-
-// Unknown slugs 404 straight away instead of being rendered on demand.
 export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return COMPONENTS.map((c) => ({ slug: c.slug }));
-}
+export const generateStaticParams = componentParams;
 
 export async function generateMetadata({ params }: PageProps<"/components/[slug]">): Promise<Metadata> {
-  const entry = getComponent((await params).slug);
-  return entry
-    ? {
-        title: `${entry.name} · ${SITE.name}`,
-        description: entry.description,
-        openGraph: { title: `${entry.name} · ${SITE.name}`, description: entry.description, url: `/components/${entry.slug}` },
-      }
-    : {};
+  const entry = requireComponent((await params).slug);
+  const title = `${entry.name} · ${SITE.name}`;
+  return { title, description: entry.description, openGraph: { title, description: entry.description, url: componentPath(entry.slug) } };
 }
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
@@ -45,16 +34,9 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
 }
 
 export default async function ComponentPage({ params }: PageProps<"/components/[slug]">) {
-  const entry = getComponent((await params).slug);
-  if (!entry) notFound();
-
-  const source = read(entry.file);
-  const utils = read("lib/utils.ts");
-  const { props: found, groups: foundGroups } = extractProps(entry.file);
-  const docs = entry.propDocs ?? {};
-  const withDoc = (row: (typeof found)[number]) => ({ ...row, description: row.description || docs[row.name] || "" });
-  const props = found.map(withDoc);
-  const groups = foundGroups.map((g) => ({ ...g, rows: g.rows.map(withDoc) }));
+  const entry = requireComponent((await params).slug);
+  const { requirements, source, utils, assets, notes } = describeSetup(entry);
+  const { props, groups } = getProps(entry);
 
   const index = COMPONENTS.findIndex((c) => c.slug === entry.slug);
   const [prev, next] = [COMPONENTS[index - 1], COMPONENTS[index + 1]];
@@ -66,9 +48,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
         <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{entry.category}</p>
         <h1 className="text-3xl font-semibold tracking-[-0.03em] md:text-4xl">{entry.name}</h1>
         <p className="max-w-2xl text-base leading-relaxed text-stone-500">{entry.description}</p>
-        <div className="flex flex-wrap gap-2 pt-1">
-          {entry.isNew && <span className="rounded-full bg-[#F494BA]/25 px-2.5 py-0.5 text-xs font-medium text-pink-800">New</span>}
-        </div>
+        {entry.isNew && <NewBadge className="inline-block px-2.5 text-xs" />}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-2">
           <CopyForAi slug={entry.slug} />
           <ShareLinks slug={entry.slug} name={entry.name} />
@@ -90,13 +70,13 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
             Installation
           </h2>
           <p className="text-sm text-stone-600">
-            Requires React 19 and Tailwind CSS v4. The components import the helper from <code className={code}>@/lib/utils</code>; if your project has no{" "}
+            Requires {requirements}. The components import the helper from <code className={code}>@/lib/utils</code>; if your project has no{" "}
             <code className={code}>@</code> path alias, change that import to a relative path.
           </p>
         </div>
         <ol className="space-y-8">
           <Step n={1} title="Install the dependencies">
-            <CodeBlock code={SITE.install} title="terminal" />
+            <CodeBlock code={SITE.install} title="terminal" lang="bash" />
           </Step>
           <Step n={2} title="Add the cn helper">
             <CodeBlock code={utils} title="lib/utils.ts" />
@@ -105,12 +85,12 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
             <p className="text-sm text-stone-600">
               Open the Code tab above, copy <code className={code}>{entry.file}</code> into your project.
             </p>
-            {entry.assets && (
+            {assets && (
               <p className="text-sm text-stone-600">
-                Also copy the folder <code className={code}>{entry.assets}</code> into your project. It holds the artwork the component loads.
+                Also copy the folder <code className={code}>{assets}</code> into your project. It holds the artwork the component loads.
               </p>
             )}
-            {entry.notes?.map((note) => (
+            {notes.map((note) => (
               <p key={note} className="text-sm text-stone-600">
                 {note}
               </p>
@@ -143,8 +123,8 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           item ? (
             <Link
               key={item.c.slug}
-              href={`/components/${item.c.slug}`}
-              className={`rounded-xl border border-black/[.08] p-4 outline-none transition-colors hover:bg-black/[.03] focus-visible:ring-2 focus-visible:ring-stone-400 ${i ? "sm:text-right" : ""}`}
+              href={componentPath(item.c.slug)}
+              className={`rounded-xl border border-black/[.08] p-4 focus-ring transition-colors hover:bg-black/[.03] ${i ? "sm:text-right" : ""}`}
             >
               <span className="block text-xs text-stone-500">{item.label}</span>
               <span className="font-medium">{item.c.name}</span>

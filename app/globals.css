@@ -4,13 +4,20 @@
   color-scheme: light;
   --background: #ffffff;
   --foreground: #111111;
+  --brand: #f494ba;
+  --topbar-h: 3.5rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@utility focus-ring {
+  @apply outline-none focus-visible:ring-2 focus-visible:ring-stone-400;
 }
 
 body {

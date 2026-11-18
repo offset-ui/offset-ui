@@ -42,7 +42,6 @@ function Table({ rows, caption }: { rows: PropRow[]; caption: string }) {
 }
 
 export function PropsTable({ props, groups }: { props: PropRow[]; groups: PropGroup[] }) {
-  if (props.length === 0) return null;
   return (
     <div className="space-y-8">
       <Table rows={props} caption="Props" />

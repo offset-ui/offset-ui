@@ -1,17 +1,19 @@
+import type { CSSProperties } from "react";
 import { CROWD } from "@/lib/crowd";
 import { cn } from "@/lib/utils";
 import { CrowdLife } from "./crowd-life";
 
 const { width, height, peepWidth, peepHeight, people } = CROWD;
+const stage = { aspectRatio: `${width}/${height}`, width: `max(100cqw, ${Math.ceil((width / height) * 100)}cqh)` };
 const pct = (value: number, total: number) => `${(value / total) * 100}%`;
 
 export function Crowd({ className }: { className?: string }) {
   return (
-    <div aria-hidden className={cn("relative", className)}>
+    <div aria-hidden className={cn("relative md:aspect-(--ratio) md:h-auto", className)} style={{ "--ratio": `${width}/${height}` } as CSSProperties}>
       <div className="absolute inset-0 overflow-hidden [container-type:size]">
-        <div className="absolute bottom-0 left-1/2 aspect-[1440/290] w-[max(100cqw,497cqh)] -translate-x-1/2">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2" style={stage}>
           {people.map((p, i) => {
-            const say = "say" in p ? (p.say as string) : undefined;
+            const { say } = p;
             return (
               <div
                 key={i}

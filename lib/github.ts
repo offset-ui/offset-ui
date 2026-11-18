@@ -1,11 +1,13 @@
 import { SITE } from "@/lib/site";
 
-/** Live star count, refreshed at most once an hour. Returns null if GitHub can't be reached. */
+const STAR_REVALIDATE_SECONDS = 3600;
+export const STAR_REFRESH_TEXT = "about once an hour";
+
 export async function getStarCount(): Promise<number | null> {
   try {
     const res = await fetch(`https://api.github.com/repos/${SITE.repo}`, {
       headers: { Accept: "application/vnd.github+json" },
-      next: { revalidate: 3600 },
+      next: { revalidate: STAR_REVALIDATE_SECONDS },
     });
     if (!res.ok) return null;
     const data: { stargazers_count?: unknown } = await res.json();

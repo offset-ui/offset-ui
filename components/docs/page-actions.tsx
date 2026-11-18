@@ -1,36 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { aiPath, componentUrl } from "@/lib/routes";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { useFlash } from "./use-flash";
 
 const pill =
-  "inline-flex items-center gap-2 rounded-full border border-black/[.08] px-3.5 py-1.5 text-xs font-medium text-stone-700 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400";
+  "inline-flex items-center gap-2 rounded-full border border-black/[.08] px-3.5 py-1.5 text-xs font-medium text-stone-700 focus-ring transition-colors hover:bg-black/5";
 
-/** Briefly flips a label after an action, for copy buttons. */
-function useFlash(ms = 1800) {
-  const [on, setOn] = useState(false);
-  return [
-    on,
-    () => {
-      setOn(true);
-      setTimeout(() => setOn(false), ms);
-    },
-  ] as const;
-}
-
-/** Copies a ready-made brief (setup, full code, props, usage) for Cursor, Claude, v0 and other assistants. */
 export function CopyForAi({ slug }: { slug: string }) {
   const [copied, flash] = useFlash();
   const [failed, setFailed] = useState(false);
 
   async function copy() {
     try {
-      const load = fetch(`/components/${slug}/ai`).then(async (res) => {
+      const load = fetch(aiPath(slug)).then(async (res) => {
         if (!res.ok) throw new Error(String(res.status));
         return new Blob([await res.text()], { type: "text/plain" });
       });
-      // Handing the clipboard a promise keeps Safari happy: it only allows the write inside the click.
+      // Safari only allows the clipboard write inside the click, so the clipboard gets a promise.
       if (typeof ClipboardItem !== "undefined") await navigator.clipboard.write([new ClipboardItem({ "text/plain": load })]);
       else await navigator.clipboard.writeText(await (await load).text());
       setFailed(false);
@@ -50,10 +39,9 @@ export function CopyForAi({ slug }: { slug: string }) {
   );
 }
 
-/** Share on X and LinkedIn, or copy the link. */
 export function ShareLinks({ slug, name }: { slug: string; name: string }) {
   const [copied, flash] = useFlash();
-  const url = `${SITE.url}/components/${slug}`;
+  const url = componentUrl(slug);
   const text = `${name}: a ${SITE.name} component`;
 
   async function copyLink() {

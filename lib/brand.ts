@@ -1,4 +1,3 @@
-/** Offset UI brand mark, taken from public/brand/source/logo-mark.svg (1024 x 1024 artboard). */
 export const BRAND = {
   ink: "#1c1917",
   pink: "#F494BA",
@@ -7,10 +6,7 @@ export const BRAND = {
   markFront: "M200.538 452.769C200.538 375.495 200.538 336.857 213.163 306.38C229.995 265.743 262.281 233.457 302.918 216.624C333.396 204 372.033 204 449.308 204H467.077C544.352 204 582.989 204 613.466 216.624C654.103 233.457 686.389 265.743 703.222 306.38C715.846 336.857 715.846 375.495 715.846 452.769C715.846 530.044 715.846 568.681 703.222 599.159C686.389 639.796 654.103 672.082 613.466 688.914C582.989 701.538 544.352 701.538 467.077 701.538H449.308C372.033 701.538 333.396 701.538 302.918 688.914C262.281 672.082 229.995 639.796 213.163 599.159C200.538 568.681 200.538 530.044 200.538 452.769Z",
 };
 
-/** The mark on a dark tile: used for the favicon, the Apple touch icon and the GitHub avatar. */
-export function tileSvg(rounded: boolean) {
-  const radius = rounded ? ' rx="230"' : "";
-  return `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024"${radius} fill="${BRAND.ink}"/><path d="${BRAND.markBack}" fill="${BRAND.pink}"/><path d="${BRAND.markFront}" fill="${BRAND.paper}"/></svg>`;
-}
+export const tileSvg = () =>
+  `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024" fill="${BRAND.ink}"/><path d="${BRAND.markBack}" fill="${BRAND.pink}"/><path d="${BRAND.markFront}" fill="${BRAND.paper}"/></svg>`;
 
 export const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;

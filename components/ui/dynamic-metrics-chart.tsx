@@ -126,7 +126,7 @@ function Metric({ label, value, change, empty }: { label: string; value: ReactNo
 
 export function DynamicMetricsChart({
   title = "Overview",
-  frames = DEMO_FRAMES,
+  frames: framesProp = DEMO_FRAMES,
   timeframe,
   colors,
   formatSales = (v) => `$${v.toFixed(2)}`,
@@ -135,6 +135,7 @@ export function DynamicMetricsChart({
   onRefresh,
 }: DynamicMetricsChartProps) {
   const { surface, text, bar } = { ...COLORS, ...colors };
+  const frames = framesProp.length ? framesProp : DEMO_FRAMES;
   const reduce = useReducedMotion();
   const [inner, setInner] = useState(frames[0].label);
   const active = timeframe ?? inner;

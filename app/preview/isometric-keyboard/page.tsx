@@ -1,5 +1,3 @@
-"use client";
-
 import { IsometricKeyboard } from "@/components/ui/isometric-keyboard";
 
 export default function IsometricKeyboardDemo() {

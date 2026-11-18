@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { AnimatePresence, animate, motion, usePresence, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -179,6 +179,7 @@ export function SharePanel({
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<"invalid" | "limit" | "duplicate" | "server" | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const errorId = useId();
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const formRef = useRef<HTMLFormElement>(null);
@@ -283,6 +284,9 @@ export function SharePanel({
             {copyState === "error" && <CautionIcon className="size-5" />}
             {copyState === "idle" && <Asset name="copy-link" className="size-5" />}
           </button>
+          <span role="status" className="sr-only">
+            {copyState === "copied" && "Link copied"}
+          </span>
         </div>
       </div>
 
@@ -290,7 +294,7 @@ export function SharePanel({
         className="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none"
         style={{ gridTemplateRows: allowAnyone ? "0fr" : "1fr" }}
       >
-        <div className="-mx-1 -my-1 overflow-hidden px-1 py-1">
+        <div inert={allowAnyone} className="-mx-1 -my-1 overflow-hidden px-1 py-1">
           <div className="flex flex-col gap-4 pt-6">
             <p className="text-base [color:var(--sp-muted)]">Invite</p>
 
@@ -325,7 +329,7 @@ export function SharePanel({
                     placeholder={recipients.length === 0 ? "Enter email address" : undefined}
                     aria-label="Recipient email"
                     aria-invalid={error === "invalid"}
-                    aria-describedby={error ? "share-panel-invite-error" : undefined}
+                    aria-describedby={error ? errorId : undefined}
                     type="email"
                     autoComplete="off"
                     name="share-panel-invite-email"
@@ -344,7 +348,7 @@ export function SharePanel({
               <AnimatePresence>
                 {error && (
                   <motion.p
-                    id="share-panel-invite-error"
+                    id={errorId}
                     role="alert"
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}

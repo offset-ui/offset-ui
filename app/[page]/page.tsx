@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { Footer } from "@/components/docs/footer";
+import { SmartLink } from "@/components/docs/smart-link";
 import { Topbar } from "@/components/docs/topbar";
-import { getStarCount } from "@/lib/github";
 import { PAGES } from "@/lib/pages";
 import { SITE } from "@/lib/site";
 
@@ -14,18 +13,16 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/[page]">): Promise<Metadata> {
   const info = PAGES[(await params).page];
-  return info ? { title: `${info.title} · ${SITE.name}`, description: info.description } : {};
+  return { title: `${info.title} · ${SITE.name}`, description: info.description };
 }
 
 export default async function InfoPage({ params }: PageProps<"/[page]">) {
   const { page } = await params;
   const info = PAGES[page];
-  if (!info) notFound();
-  const stars = await getStarCount();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Topbar stars={stars} />
+      <Topbar />
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
         <h1 className="text-4xl font-semibold tracking-tight">{info.title}</h1>
         <p className="mt-3 text-stone-600">{info.description}</p>
@@ -45,9 +42,9 @@ export default async function InfoPage({ params }: PageProps<"/[page]">) {
                 <ul className="space-y-1.5">
                   {section.links.map(([name, href]) => (
                     <li key={name}>
-                      <a href={href} target={href.startsWith("mailto:") ? undefined : "_blank"} rel="noreferrer" className="rounded-sm font-medium text-foreground underline underline-offset-4 outline-none hover:text-stone-600 focus-visible:ring-2 focus-visible:ring-stone-400">
+                      <SmartLink href={href} className="rounded-sm font-medium text-foreground underline underline-offset-4 focus-ring hover:text-stone-600">
                         {name} ↗
-                      </a>
+                      </SmartLink>
                     </li>
                   ))}
                 </ul>

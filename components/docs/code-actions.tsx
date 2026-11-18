@@ -1,23 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useFlash } from "./use-flash";
 
 const button =
-  "rounded-md px-2.5 py-1 text-xs font-medium text-stone-600 outline-none transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-stone-400";
+  "rounded-md px-2.5 py-1 text-xs font-medium text-stone-600 focus-ring transition-colors hover:bg-black/5";
 
-/** Copies the text of the nearest code block, read from the page so the code is not sent to the browser twice. */
 export function CopyButton() {
-  const [copied, setCopied] = useState(false);
+  const [copied, flash] = useFlash(1600);
 
-  async function copy(e: React.MouseEvent<HTMLButtonElement>) {
+  function copy(e: React.MouseEvent<HTMLButtonElement>) {
     const text = e.currentTarget.closest("[data-code]")?.querySelector("pre")?.textContent ?? "";
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      setCopied(false);
-    }
+    navigator.clipboard.writeText(text).then(flash, () => window.prompt("Copy this code", text));
   }
 
   return (
@@ -27,7 +20,6 @@ export function CopyButton() {
   );
 }
 
-/** Flips `data-expanded` on the code block; the CSS shows the right label and height. */
 export function CollapseToggle() {
   return (
     <button
@@ -36,7 +28,7 @@ export function CollapseToggle() {
         const block = e.currentTarget.closest<HTMLElement>("[data-code]");
         if (block) block.dataset.expanded = block.dataset.expanded === "true" ? "false" : "true";
       }}
-      className="w-full border-t border-black/[.08] bg-stone-50 py-2.5 text-xs font-medium text-stone-500 outline-none transition-colors hover:bg-black/[.04] hover:text-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stone-400"
+      className="w-full border-t border-black/[.08] bg-stone-50 py-2.5 text-xs font-medium text-stone-500 focus-ring transition-colors hover:bg-black/[.04] hover:text-stone-800 focus-visible:ring-inset"
     >
       <span className="group-data-[expanded=true]/code:hidden">Show full code</span>
       <span className="hidden group-data-[expanded=true]/code:inline">Collapse</span>

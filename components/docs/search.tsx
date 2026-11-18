@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { NavItem } from "@/lib/registry";
+import { componentPath } from "@/lib/routes";
 
-export type SearchItem = { slug: string; name: string; description: string; category: string };
 
-export function Search({ items }: { items: SearchItem[] }) {
+export function Search({ items }: { items: NavItem[] }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState("");
@@ -29,7 +30,7 @@ export function Search({ items }: { items: SearchItem[] }) {
 
   const go = (slug: string) => {
     dialog.current?.close();
-    router.push(`/components/${slug}`);
+    router.push(componentPath(slug));
   };
 
   return (
@@ -37,7 +38,7 @@ export function Search({ items }: { items: SearchItem[] }) {
       <button
         type="button"
         onClick={() => dialog.current?.showModal()}
-        className="flex h-9 items-center gap-2 rounded-full bg-black/[.05] px-3 text-sm text-stone-500 outline-none transition-colors hover:bg-black/[.08] focus-visible:ring-2 focus-visible:ring-stone-400 sm:w-72"
+        className="flex h-9 items-center gap-2 rounded-full bg-black/[.05] px-3 text-sm text-stone-500 focus-ring transition-colors hover:bg-black/[.08] sm:w-72"
       >
         <svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
           <circle cx="7" cy="7" r="4.5" />

@@ -252,14 +252,15 @@ export function ProximityScrollIndicator({ sections = DEFAULT_SECTIONS, colors, 
       className={cn("fixed left-1/2 z-50 flex -translate-x-1/2 items-start", top ? "top-6 flex-col" : "bottom-6 flex-col-reverse", className)}
       style={{ gap: STACK_GAP, width: CARD }}
     >
-      <div style={{ ...card, width: CARD, height: CARD, flexShrink: 0 }}>
+      <div tabIndex={0} role="button" aria-expanded={open} aria-label="Section navigation" style={{ ...card, width: CARD, height: CARD, flexShrink: 0 }}>
         <ProgressRing progressColor={progress} trackColor={`color-mix(in srgb, ${ink} 10%, ${surface})`} reduce={reduce} />
       </div>
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <motion.nav
             key="panel"
+            aria-label="Section navigation"
             initial={reduce ? false : { opacity: 0, scale: 0.92, y: shift }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: shift * 0.67 }}
@@ -268,8 +269,6 @@ export function ProximityScrollIndicator({ sections = DEFAULT_SECTIONS, colors, 
             style={{ ...card, padding: PADDING, transformOrigin: top ? "top center" : "bottom center" }}
           >
             <ul
-              role="navigation"
-              aria-label="Section navigation"
               className="flex min-w-max flex-col items-start"
               onPointerMove={(e) => pointerY.set(e.clientY)}
               onPointerLeave={() => pointerY.set(Number.POSITIVE_INFINITY)}
@@ -291,7 +290,7 @@ export function ProximityScrollIndicator({ sections = DEFAULT_SECTIONS, colors, 
                 />
               ))}
             </ul>
-          </motion.div>
+          </motion.nav>
         )}
       </AnimatePresence>
     </div>

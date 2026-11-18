@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { previewPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 type PreviewFrameProps = {
@@ -11,12 +12,12 @@ type PreviewFrameProps = {
 };
 
 const TABS = ["Preview", "Code"] as const;
-const BUTTON = "rounded-md px-2.5 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-stone-400";
+const BUTTON = "rounded-md px-2.5 py-1 text-xs font-medium focus-ring transition-colors";
 
 export function PreviewFrame({ slug, title, height, children }: PreviewFrameProps) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Preview");
   const [run, setRun] = useState(0);
-  const src = `/preview/${slug}`;
+  const src = previewPath(slug);
   return (
     <div className="overflow-hidden rounded-2xl border border-black/[.08] bg-white">
       <div className="flex items-center justify-between border-b border-black/[.08] px-3 py-2">

@@ -1,10 +1,9 @@
-import { SITE } from "@/lib/site";
+import { STAR_REFRESH_TEXT } from "@/lib/github";
+import { repoUrl, SITE, SOCIAL_LINKS } from "@/lib/site";
 
 export type Section = { heading?: string; text?: string[]; list?: string[]; code?: string; links?: [string, string][] };
 export type InfoPage = { title: string; description: string; updated?: string; sections: Section[] };
 
-const { x, instagram, email, portfolio } = SITE.socials;
-const elsewhere: [string, string][] = [["X", x], ["Instagram", instagram], ["Email", email && `mailto:${email}`], ["Portfolio", portfolio]].filter(([, href]) => href) as [string, string][];
 const UPDATED = "November 15, 2026";
 
 export const PAGES: Record<string, InfoPage> = {
@@ -39,7 +38,7 @@ export const PAGES: Record<string, InfoPage> = {
           "Code that has been released under MIT stays MIT. If we ever add something new on different terms, we will say so clearly and it will not change what you already have.",
           "The licence covers the code. The Offset UI name, logo and the design of this website are not part of it.",
         ],
-        links: [["Read the full licence on GitHub", `${SITE.github}/blob/main/LICENSE`], ["View the source", SITE.github]],
+        links: [["Read the full licence on GitHub", repoUrl("/blob/main/LICENSE")], ["View the source", SITE.github]],
       },
       {
         heading: "Built in public",
@@ -58,7 +57,7 @@ export const PAGES: Record<string, InfoPage> = {
       {
         heading: "Bugs and questions",
         text: ["Open an issue on GitHub. Say which component and browser you used, and what you expected to happen. A short screen recording helps a lot."],
-        links: [["Open an issue", `${SITE.github}/issues/new/choose`]],
+        links: [["Open an issue", repoUrl("/issues/new/choose")]],
       },
       {
         heading: "Ask for a component",
@@ -68,9 +67,9 @@ export const PAGES: Record<string, InfoPage> = {
       {
         heading: "Security problems",
         text: ["Please do not post these publicly. Report them privately through GitHub and we will reply within 7 days."],
-        links: [["Report privately", `${SITE.github}/security/advisories/new`]],
+        links: [["Report privately", repoUrl("/security/advisories/new")]],
       },
-      ...(elsewhere.length ? [{ heading: "Elsewhere", links: elsewhere }] : []),
+      ...(SOCIAL_LINKS.length ? [{ heading: "Elsewhere", links: SOCIAL_LINKS }] : []),
     ],
   },
   faq: {
@@ -79,7 +78,7 @@ export const PAGES: Record<string, InfoPage> = {
     sections: [
       { heading: "Is Offset UI free?", text: ["Yes. The components are free to use under the MIT licence. Code released under MIT stays MIT."] },
       { heading: "Can I use it in client or commercial work?", text: ["Yes. Use it in personal, client and commercial projects. Keep the licence notice with the code you copy. You do not need to credit us in your product."] },
-      { heading: "How do I add a component?", text: ["Open its page, copy the file into your project, and install the three small packages once.", "Then import it and use it. Each page shows the exact steps."], code: SITE.install },
+      { heading: "How do I add a component?", text: ["Open its page, copy the file into your project, and install the small packages once.", "Then import it and use it. Each page shows the exact steps."], code: SITE.install },
       { heading: "Does it need Tailwind CSS?", text: ["The components are styled with Tailwind CSS v4 classes, so your project needs Tailwind. They also use the motion, clsx and tailwind-merge packages."] },
       { heading: "Which frameworks does it work with?", text: ["Any React project, such as Next.js or Vite. We build and test on React 19."] },
       { heading: "What is Copy for AI?", text: ["A button on every component page that copies a ready-made prompt with the full code, so Cursor, Claude or ChatGPT can add the component to your project for you."] },
@@ -99,7 +98,7 @@ export const PAGES: Record<string, InfoPage> = {
       {
         heading: "The code",
         text: ["The components are released under the MIT licence. You can use, copy, change and share them, including in commercial work, as long as you keep the licence notice with the code you copy.", "The code is provided as it is, with no warranty of any kind. Please test it in your own project before you rely on it. To the extent the law allows, we are not responsible for any loss that comes from using the site or the code."],
-        links: [["Read the licence", `${SITE.github}/blob/main/LICENSE`]],
+        links: [["Read the licence", repoUrl("/blob/main/LICENSE")]],
       },
       { heading: "What is not covered by the licence", text: ["The Offset UI name, logo and the design of this website belong to us. Please do not use them in a way that suggests we made or approved your product. The sample content in component previews is for demonstration only."] },
       { heading: "Contributions", text: ["If you send code or artwork to the repository, only send work you have the right to share under the MIT licence."] },
@@ -124,10 +123,17 @@ export const PAGES: Record<string, InfoPage> = {
           "Copy buttons copy to your clipboard. Nothing is sent anywhere.",
           "Component previews run in your browser. Anything you type into them stays there.",
           "Fonts are served from this site, not requested from other companies when you visit.",
-          "The GitHub star count is fetched by our server about once an hour, so your browser does not contact GitHub for it.",
+          `The GitHub star count is fetched by our server ${STAR_REFRESH_TEXT}, so your browser does not contact GitHub for it.`,
         ],
       },
-      { heading: "Newsletter", text: ["The \"Get the next component\" box currently just links to GitHub releases and collects nothing. If that ever changes, we will update this page first."] },
+      {
+        heading: "Newsletter",
+        text: [
+          SITE.newsletter
+            ? "If you subscribe through the \"Get the next component\" box, your email address goes to our newsletter provider, Buttondown, and is used only to send you new-component updates. You can unsubscribe from any email."
+            : "The \"Get the next component\" box currently just links to GitHub releases and collects nothing. If that ever changes, we will update this page first.",
+        ],
+      },
       { heading: "Links to other sites", text: ["When you click through to GitHub or another site, that site's own privacy policy applies."] },
       { heading: "Your data", text: ["Since we do not keep personal information about you, there is very little to access or delete. If you have a question or concern, tell us on the Contact page."] },
       { heading: "Changes", text: ["If we change how the site works, we will update this page and the date at the top."] },

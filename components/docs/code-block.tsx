@@ -6,15 +6,16 @@ import { CollapseToggle, CopyButton } from "./code-actions";
 type CodeBlockProps = {
   code: string;
   title?: string;
+  lang?: "tsx" | "bash";
   className?: string;
 };
 
 const COLLAPSE_AFTER = 14;
 const highlighter = createHighlighter({ themes: ["github-light"], langs: ["tsx", "bash"] });
 
-export async function CodeBlock({ code, title, className }: CodeBlockProps) {
+export async function CodeBlock({ code, title, lang = "tsx", className }: CodeBlockProps) {
   const long = code.split("\n").length > COLLAPSE_AFTER;
-  const { tokens } = (await highlighter).codeToTokens(code.trimEnd(), { lang: title === "terminal" ? "bash" : "tsx", theme: "github-light" });
+  const { tokens } = (await highlighter).codeToTokens(code.trimEnd(), { lang, theme: "github-light" });
   return (
     <div
       data-code
