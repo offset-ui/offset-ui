@@ -8,11 +8,10 @@
   --card: #f6f6f6;
   --hairline: color-mix(in srgb, var(--foreground) 5%, transparent);
   --topbar-h: 3.5rem;
-  /* Headline tracking. Figma uses -9% (-0.09em) with SF Compact. These two are for the Inter Tight stand-in, which runs
-     ~5% narrower at that value, so they are loosened to land on Figma's line widths (486px / 275px). When SF Compact
-     is installed, <FontProbe> sets html[data-sf] and the values below take over. */
-  --display-tracking: -0.069em;
-  --display-tracking-italic: -0.054em;
+  /* Headline tracking. Figma: -9% on the SF Compact Regular headline (-0.09em). The Heavy Italic "touch twice" is cut a
+     little narrower than Figma's 275px at -9%, so it is opened to -0.075em to land on the same width. */
+  --display-tracking: -0.09em;
+  --display-tracking-italic: -0.075em;
   /* Corners. Figma uses iOS corner smoothing at 100%; <SquircleLayer> draws the exact shape.
      --corner-smoothing: 1 = Figma 100%, 0.6 = iOS default, 0 = plain round.
      --corner-shape is the CSS fallback for browsers/elements without the drawn shape. */
@@ -56,32 +55,29 @@
   isolation: isolate;
 }
 
-/* SF Compact, the font used in Figma, picked up from the machine's installed fonts (it is not bundled: Apple's
-   license limits SF to Apple-platform apps and mockups). Figma's "Regular", "Bold Italic" and "Light" are the static
-   Text cuts, which is what these names map to; widths match Figma's (Regular 487px vs 486px at -9%). */
+/* Fonts from Figma, bundled as Latin-only WOFF2 in /public/fonts (see public/fonts/README.md): SF Compact Text
+   Regular (headline), SF Compact Text Heavy Italic ("touch twice") and Futura Bold Italic ("Offset MOTION"). Inter Tight
+   and Jost stay as fallbacks while they load. */
 @font-face {
   font-family: "SF Compact Brand";
-  src: local("SFCompactText-Regular"), local("SF Compact Text Regular");
+  src: url("/fonts/SFCompactText-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: "SF Compact Brand";
-  src: local("SFCompactText-Light"), local("SF Compact Text Light");
-  font-weight: 300;
-  font-style: normal;
-}
-@font-face {
-  font-family: "SF Compact Brand";
-  src: local("SFCompactText-HeavyItalic"), local("SF Compact Text Heavy Italic");
+  src: url("/fonts/SFCompactText-HeavyItalic.woff2") format("woff2");
   font-weight: 790;
   font-style: italic;
+  font-display: swap;
 }
-
-html[data-sf] {
-  --display-tracking: -0.09em;
-  /* Figma's italic measures 275px; the Heavy Italic cut is 3% narrower at -9%, so it is opened by the same amount. */
-  --display-tracking-italic: -0.075em;
+@font-face {
+  font-family: "Futura Brand";
+  src: url("/fonts/Futura-Bold-Italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
 }
 
 /* "touch twice" in the hero: a bright shine sweeps left to right across both words as one movement, then rests.
@@ -146,14 +142,6 @@ html[data-sf] {
   }
 }
 
-/* "Offset MOTION": the Futura Bold Italic installed on this machine (Figma calls it Futura-Bold-Italic), then Jost. */
-@font-face {
-  font-family: "Futura Brand";
-  src: local("Futura-Bold-Italic"), local("Futura Bold Italic"), local("Futura-BoldOblique"), local("Futura Md BT Bold Italic");
-  font-weight: 700;
-  font-style: italic;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -163,10 +151,10 @@ html[data-sf] {
   --color-hairline: color-mix(in srgb, var(--foreground) 5%, transparent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* Headline + "Offset MOTION" wordmark. SF Compact and Futura are used when installed;
-     Inter Tight and Jost are the closest web-licensed stand-ins. */
+  /* Headline + "Offset MOTION" wordmark: the bundled SF Compact and Futura (see @font-face above), with Inter Tight and
+     Jost as fallbacks while they load. */
   --font-display: "SF Compact Brand", var(--font-inter-tight), system-ui, sans-serif;
-  --font-futura: "Futura Brand", Futura, "Futura PT", var(--font-jost), "Century Gothic", sans-serif;
+  --font-futura: "Futura Brand", var(--font-jost), sans-serif;
 }
 
 /* CSS fallback for iOS-style corners. Pair with any `rounded-*` radius. Browsers without corner-shape support

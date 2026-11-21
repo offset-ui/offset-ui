@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter_Tight, Jost } from "next/font/google";
 import "./globals.css";
-import { FontProbe } from "@/components/docs/font-probe";
 import { SITE } from "@/lib/site";
 
 const geistSans = Geist({
@@ -41,8 +40,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${interTight.variable} ${jost.variable} h-full antialiased`}
     >
+      <head>
+        {/* The hero headline fonts: fetched early so the stand-in never shows. */}
+        <link rel="preload" href="/fonts/SFCompactText-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/SFCompactText-HeavyItalic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-full flex flex-col">
-        <FontProbe />
         {children}
       </body>
     </html>
