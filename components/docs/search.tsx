@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { NavItem } from "@/lib/registry";
 import { componentPath } from "@/lib/routes";
+import { SquircleLayer } from "./squircle-layer";
 
 
 export function Search({ items }: { items: NavItem[] }) {
@@ -38,14 +40,12 @@ export function Search({ items }: { items: NavItem[] }) {
       <button
         type="button"
         onClick={() => dialog.current?.showModal()}
-        className="flex h-9 items-center gap-2 rounded-full bg-black/[.05] px-3 text-sm text-stone-500 focus-ring transition-colors hover:bg-black/[.08] sm:w-72"
+        className="smooth flex h-8 items-center gap-2 rounded-(--radius-control) bg-foreground/5 px-3 text-sm text-muted focus-ring transition-colors hover:bg-foreground/[.08] [--sq-fill:color-mix(in_srgb,var(--foreground)_5%,transparent)] hover:[--sq-fill:color-mix(in_srgb,var(--foreground)_8%,transparent)] sm:w-72"
       >
-        <svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-          <circle cx="7" cy="7" r="4.5" />
-          <path d="m10.5 10.5 3 3" />
-        </svg>
+        <SquircleLayer radius="--radius-control" fill="var(--sq-fill)" />
+        <Image aria-hidden src="/icons/search.svg" alt="" width={16} height={16} className="shrink-0" />
         <span className="hidden flex-1 text-left sm:block">Search components…</span>
-        <kbd className="hidden rounded bg-black/[.06] px-1.5 font-sans text-[11px] sm:block">Ctrl K</kbd>
+        <kbd className="hidden rounded bg-foreground/5 px-1.5 font-sans text-[11px] leading-[16.5px] text-foreground sm:block">Ctrl K</kbd>
         <span className="sr-only sm:hidden">Search components</span>
       </button>
 

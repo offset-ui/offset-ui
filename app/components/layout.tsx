@@ -10,7 +10,7 @@ export default function ComponentsLayout({ children }: LayoutProps<"/components"
         <Sidebar />
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="flex-1">{children}</div>
-          <Footer />
+          <Footer className="mt-24" />
         </main>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { SITE, SOCIAL_LINKS } from "@/lib/site";
+import { cn } from "@/lib/utils";
 import { SmartLink } from "./smart-link";
 
 const LINKS: [string, string][] = [
@@ -13,13 +14,13 @@ const LINKS: [string, string][] = [
     ...SOCIAL_LINKS,
 ];
 
-const LINK = "rounded-sm text-foreground/50 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/40";
+const LINK = "rounded-sm text-[#111]/50 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/40";
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   return (
-    <footer className="mt-24 border-t border-black/[.08] px-4 py-8 text-sm md:px-6">
+    <footer className={cn("border-t border-black/[.08] bg-white px-4 py-8 text-sm md:px-6", className)}>
       <div className="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
-        <p className="text-foreground/50">
+        <p className="text-[#111]/50">
           © {new Date().getFullYear()} {SITE.name} · MIT licensed
         </p>
         <nav aria-label="Footer">

@@ -53,7 +53,7 @@ export default async function InfoPage({ params }: PageProps<"/[page]">) {
           ))}
         </div>
       </main>
-      <Footer />
+      <Footer className="mt-24" />
     </div>
   );
 }

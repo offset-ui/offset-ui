@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 const BLINK_MS = 140;
 const CLOSED = 0.08;
-const BUBBLE_MS = 3200;
+const BUBBLE_MS = 2000; // how long a bubble stays up
+const NEXT_MS = 120; // pause before the next peep speaks (plus up to NEXT_JITTER_MS)
+const NEXT_JITTER_MS = 220;
 const EDGE = 118;
 const TOP_SAFE = 120;
 
@@ -50,12 +52,14 @@ export function CrowdLife() {
       hide = window.setTimeout(() => {
         showing = false;
         setBubble(null);
+        if (!reduce) chatter(NEXT_MS + Math.random() * NEXT_JITTER_MS);
       }, BUBBLE_MS);
     };
     const silence = () => {
       window.clearTimeout(hide);
       showing = false;
       setBubble(null);
+      if (!reduce) chatter(NEXT_MS + Math.random() * NEXT_JITTER_MS);
     };
     const speaker = (e: Event) => (e.target as Element).closest<HTMLElement>("[data-say]");
 
@@ -79,19 +83,22 @@ export function CrowdLife() {
       const headY = r.top + r.height * 0.1;
       return headX > 16 && headX < innerWidth - 16 && headY > TOP_SAFE && headY < innerHeight - 16;
     };
-    const chatter = () => {
+    // One chain: a bubble hides, then the next peep speaks right after. `say` ends by calling `chatter` again.
+    function chatter(delay: number) {
+      window.clearTimeout(auto);
       auto = window.setTimeout(() => {
         if (!document.hidden && !showing && !hovering) {
           const options = [...crowd.querySelectorAll<HTMLElement>("[data-say]")].filter((el) => el !== last && onScreen(el));
           if (options.length) {
             last = options[Math.floor(Math.random() * options.length)];
             say(last);
+            return;
           }
         }
-        chatter();
-      }, 1800 + Math.random() * 4200);
-    };
-    if (!reduce) chatter();
+        chatter(400); // nothing to say right now (busy, hovering or off screen): look again shortly
+      }, delay);
+    }
+    if (!reduce) chatter(500);
 
     if (canHover) {
       crowd.addEventListener("mouseover", over);
@@ -110,7 +117,7 @@ export function CrowdLife() {
     <div ref={host} className="pointer-events-none absolute inset-0 z-20">
       {bubble && (
         <div className="absolute w-max max-w-[220px] -translate-x-1/2 -translate-y-full pb-2" style={{ left: bubble.x, top: bubble.y }}>
-          <div className="relative rounded-2xl border border-black/[.08] bg-white px-3.5 py-2 text-[13px] font-medium leading-snug shadow-[0_10px_28px_-10px_rgba(0,0,0,.2)] motion-safe:animate-[rise_.18s_ease-out_both]">
+          <div className="relative rounded-2xl border border-black/[.08] bg-white px-3.5 py-2 text-[13px] font-medium leading-snug shadow-[0_10px_28px_-10px_rgba(0,0,0,.2)] motion-safe:animate-[rise_.12s_ease-out_both]">
             {bubble.text}
             <span aria-hidden className="absolute left-1/2 top-full -mt-1 size-2 -translate-x-1/2 rotate-45 border-b border-r border-black/[.08] bg-white" />
           </div>
