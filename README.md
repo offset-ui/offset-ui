@@ -67,6 +67,7 @@ components/docs/      docs site UI (sidebar, code block, preview frame)
 lib/registry.ts       list of components shown on the docs site, with their prop descriptions
 lib/site.ts           name, tagline and links
 scripts/              build-crowd.mjs regenerates the home page illustration (npm run crowd)
+                      build-thumbnails.mjs regenerates the card thumbnails (npm run thumbnails)
 public/               artwork used by some components
 ```
 

@@ -126,14 +126,6 @@ export const PAGES: Record<string, InfoPage> = {
           `The GitHub star count is fetched by our server ${STAR_REFRESH_TEXT}, so your browser does not contact GitHub for it.`,
         ],
       },
-      {
-        heading: "Newsletter",
-        text: [
-          SITE.newsletter
-            ? "If you subscribe through the \"Get the next component\" box, your email address goes to our newsletter provider, Buttondown, and is used only to send you new-component updates. You can unsubscribe from any email."
-            : "The \"Get the next component\" box currently just links to GitHub releases and collects nothing. If that ever changes, we will update this page first.",
-        ],
-      },
       { heading: "Links to other sites", text: ["When you click through to GitHub or another site, that site's own privacy policy applies."] },
       { heading: "Your data", text: ["Since we do not keep personal information about you, there is very little to access or delete. If you have a question or concern, tell us on the Contact page."] },
       { heading: "Changes", text: ["If we change how the site works, we will update this page and the date at the top."] },

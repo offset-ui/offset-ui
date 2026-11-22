@@ -9,7 +9,7 @@ const fenced = (language: string, code: string) => `\`\`\`${language}\n${code.tr
 export function buildAiPrompt(entry: ComponentEntry): string {
   const setup = describeSetup(entry);
   const propLines = getProps(entry)
-    .props.map((p) => `- ${p.name}${p.required ? "" : "?"}: ${p.type}${p.default ? ` (default ${p.default})` : ""}${p.description ? `. ${p.description}` : ""}`)
+    .map((p) => `- ${p.name}${p.required ? "" : "?"}: ${p.type}${p.default ? ` (default ${p.default})` : ""}${p.description ? `. ${p.description}` : ""}`)
     .join("\n");
 
   const steps = [

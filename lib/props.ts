@@ -2,17 +2,12 @@ import ts from "typescript";
 import type { ComponentEntry } from "@/lib/registry";
 import { readSource } from "@/lib/source";
 
-export type PropRow = {
+type PropRow = {
   name: string;
   type: string;
   required: boolean;
   default?: string;
   description: string;
-};
-
-export type PropGroup = {
-  prop: string;
-  rows: PropRow[];
 };
 
 const collapse = (text: string, max = 70) => {
@@ -40,20 +35,6 @@ function resolveConst(source: ts.SourceFile, text: string): string {
   return text;
 }
 
-function findObjectDefaults(source: ts.SourceFile, typeName: string): Map<string, string> {
-  const out = new Map<string, string>();
-  for (const stmt of source.statements) {
-    if (!ts.isVariableStatement(stmt)) continue;
-    for (const decl of stmt.declarationList.declarations) {
-      if (decl.type?.getText() !== typeName || !decl.initializer || !ts.isObjectLiteralExpression(decl.initializer)) continue;
-      for (const prop of decl.initializer.properties) {
-        if (ts.isPropertyAssignment(prop)) out.set(prop.name.getText(), collapse(prop.initializer.getText()));
-      }
-    }
-  }
-  return out;
-}
-
 function toRows(members: ts.NodeArray<ts.TypeElement>, defaults: Map<string, string>, docs: Record<string, string>): PropRow[] {
   return members.filter(ts.isPropertySignature).map((member) => ({
     name: memberName(member),
@@ -64,7 +45,7 @@ function toRows(members: ts.NodeArray<ts.TypeElement>, defaults: Map<string, str
   }));
 }
 
-export function getProps(entry: Pick<ComponentEntry, "file" | "propDocs">): { props: PropRow[]; groups: PropGroup[] } {
+export function getProps(entry: Pick<ComponentEntry, "file" | "propDocs">): PropRow[] {
   const docs = entry.propDocs ?? {};
   const source = ts.createSourceFile(entry.file, readSource(entry.file), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
@@ -72,7 +53,7 @@ export function getProps(entry: Pick<ComponentEntry, "file" | "propDocs">): { pr
     .filter((s): s is ts.TypeAliasDeclaration | ts.InterfaceDeclaration => ts.isTypeAliasDeclaration(s) || ts.isInterfaceDeclaration(s))
     .find((s) => s.name.text.endsWith("Props"));
   const members = propsType && findTypeMembers(source, propsType.name.text);
-  if (!propsType || !members) return { props: [], groups: [] };
+  if (!propsType || !members) return [];
 
   const defaults = new Map<string, string>();
   for (const stmt of source.statements) {
@@ -86,20 +67,15 @@ export function getProps(entry: Pick<ComponentEntry, "file" | "propDocs">): { pr
 
   const props = toRows(members, defaults, docs);
 
-  const groups: PropGroup[] = [];
+  const known = new Set(props.map((row) => row.name));
   for (const member of members.filter(ts.isPropertySignature)) {
     const typeText = member.type?.getText() ?? "";
     const named = /^Partial<(\w+)>/.exec(typeText) ?? /keyof (\w+)\]/.exec(typeText);
     const groupMembers = named && findTypeMembers(source, named[1]);
-    if (named && groupMembers) {
-      const rows = toRows(groupMembers, findObjectDefaults(source, named[1]), docs).map((row) => ({ ...row, required: false }));
-      groups.push({ prop: memberName(member), rows });
-    }
+    groupMembers?.filter(ts.isPropertySignature).forEach((groupMember) => known.add(memberName(groupMember)));
   }
-
-  const known = new Set([...props, ...groups.flatMap((g) => g.rows)].map((row) => row.name));
   const stale = Object.keys(docs).filter((key) => !known.has(key));
   if (stale.length) throw new Error(`propDocs for ${entry.file} mention props that do not exist: ${stale.join(", ")}`);
 
-  return { props, groups };
+  return props;
 }

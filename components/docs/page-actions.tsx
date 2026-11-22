@@ -1,13 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { aiPath, componentUrl } from "@/lib/routes";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { VARIANTS } from "./button";
+import { SquircleLayer } from "./squircle-layer";
 import { useFlash } from "./use-flash";
 
-const pill =
-  "inline-flex items-center gap-2 rounded-full border border-black/[.08] px-3.5 py-1.5 text-xs font-medium text-stone-700 focus-ring transition-colors hover:bg-black/5";
+const ICONS = {
+  sparkle: { d: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z", stroke: true },
+  link: { d: "M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71", stroke: true },
+  x: { d: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z", stroke: false },
+};
+
+const buttonClass = (variant: keyof typeof VARIANTS) =>
+  cn("smooth inline-flex items-center gap-1.5 rounded-(--radius-control) px-3.5 py-1.5 text-xs font-medium transition-colors focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background", VARIANTS[variant].className);
+
+function Content({ variant, icon, children }: { variant: keyof typeof VARIANTS; icon: keyof typeof ICONS; children: ReactNode }) {
+  const { d, stroke } = ICONS[icon];
+  return (
+    <>
+      <SquircleLayer radius="--radius-control" fill="var(--sq-fill)" border={VARIANTS[variant].border} />
+      <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill={stroke ? "none" : "currentColor"} stroke={stroke ? "currentColor" : undefined} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d={d} />
+      </svg>
+      {children}
+    </>
+  );
+}
 
 export function CopyForAi({ slug }: { slug: string }) {
   const [copied, flash] = useFlash();
@@ -30,19 +51,17 @@ export function CopyForAi({ slug }: { slug: string }) {
   }
 
   return (
-    <button type="button" onClick={copy} className={cn(pill, "bg-foreground text-background hover:bg-foreground/85")}>
-      <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z" />
-      </svg>
-      <span role="status">{failed ? "Couldn't copy, try again" : copied ? "Copied for AI" : "Copy for AI"}</span>
+    <button type="button" onClick={copy} className={buttonClass("primary")}>
+      <Content variant="primary" icon="sparkle">
+        <span role="status">{failed ? "Couldn't copy, try again" : copied ? "Copied for AI" : "Copy for AI"}</span>
+      </Content>
     </button>
   );
 }
 
-export function ShareLinks({ slug, name }: { slug: string; name: string }) {
+export function ShareLink({ slug }: { slug: string }) {
   const [copied, flash] = useFlash();
   const url = componentUrl(slug);
-  const text = `${name}: a ${SITE.name} component`;
 
   async function copyLink() {
     try {
@@ -54,30 +73,26 @@ export function ShareLinks({ slug, name }: { slug: string; name: string }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Share this component">
-      <a
-        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`}
-        target="_blank"
-        rel="noreferrer"
-        className={pill}
-      >
-        <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </svg>
-        Post
-      </a>
-      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noreferrer" className={pill}>
-        <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 110-4.13 2.06 2.06 0 010 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
-        </svg>
-        Share
-      </a>
-      <button type="button" onClick={copyLink} className={pill}>
-        <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-        </svg>
-        <span role="status">{copied ? "Link copied" : "Copy link"}</span>
-      </button>
-    </div>
+    <button type="button" onClick={copyLink} className={buttonClass("outline")}>
+      <Content variant="outline" icon="link">
+        <span role="status">{copied ? "Link copied" : "Share Link"}</span>
+      </Content>
+    </button>
+  );
+}
+
+export function PostOnX({ slug, name }: { slug: string; name: string }) {
+  const text = `${name}: a ${SITE.name} component`;
+  return (
+    <a
+      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(componentUrl(slug))}`}
+      target="_blank"
+      rel="noreferrer"
+      className={buttonClass("outline")}
+    >
+      <Content variant="outline" icon="x">
+        Post on X
+      </Content>
+    </a>
   );
 }

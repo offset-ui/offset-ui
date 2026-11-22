@@ -1,12 +1,11 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { SmartLink } from "./smart-link";
 import { SquircleLayer } from "./squircle-layer";
 
 const FOCUS = "focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-// `bg-*` / `border-*` are the fallback until <SquircleLayer> draws the smooth shape; `--sq-fill` drives its hover colour.
-const VARIANTS = {
+export const VARIANTS = {
   primary: {
     className: "bg-[#111] text-white hover:bg-[#111]/85 [--sq-fill:#111] hover:[--sq-fill:rgb(17_17_17/0.85)]",
     border: undefined,
@@ -21,23 +20,16 @@ type ButtonProps = {
   href: string;
   children: ReactNode;
   variant?: keyof typeof VARIANTS;
-  /** Corner radius in px. */
-  radius?: number;
-  /** Corner smoothing: 1 is Figma 100%, 0.6 the iOS default, 0 a plain round corner. */
-  smoothing?: number;
-  className?: string;
 };
 
-export function Button({ href, children, variant = "primary", radius = 8, smoothing = 1, className }: ButtonProps) {
+export function Button({ href, children, variant = "primary" }: ButtonProps) {
   const { className: variantClass, border } = VARIANTS[variant];
-  const style = { "--r": `${radius}px`, "--corner-smoothing": smoothing } as CSSProperties;
   return (
     <SmartLink
       href={href}
-      style={style}
-      className={cn("smooth inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-(--r) px-5 text-sm font-medium transition-colors", FOCUS, variantClass, className)}
+      className={cn("smooth inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-(--radius-control) px-5 text-sm font-medium transition-colors", FOCUS, variantClass)}
     >
-      <SquircleLayer radius="--r" fill="var(--sq-fill)" border={border} />
+      <SquircleLayer radius="--radius-control" fill="var(--sq-fill)" border={border} />
       {children}
     </SmartLink>
   );

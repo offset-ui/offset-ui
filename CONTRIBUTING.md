@@ -27,6 +27,7 @@ Before opening a pull request, run `npm run typecheck`, `npm run lint` and `npm 
 - Reuse the shared docs pieces (`NewBadge`, `SmartLink`, `useFlash`, the `focus-ring` utility) before adding a new one.
 - Delete dead code and unused options in the same change that makes them unused.
 - Comment only what the code cannot say, such as a third-party quirk. Do not restate the code.
+- Card thumbnails are generated: run `npm run thumbnails -- http://localhost:3000` against a running site after adding or changing a demo page, and commit the new `public/thumbnails/<slug>.webp`. It needs Chrome or Edge (set `CHROME` to its path if it is not found).
 - The home page crowd is generated: change `scripts/build-crowd.mjs` and run `npm run crowd`.
 
 ## Reporting bugs and requesting components

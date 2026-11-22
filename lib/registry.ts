@@ -7,7 +7,6 @@ export type ComponentEntry = {
   description: string;
   file: string;
   assets?: string;
-  previewHeight: number;
   isNew?: boolean;
   usage: string;
   notes?: string[];
@@ -24,7 +23,6 @@ const ENTRIES: Entry[] = [
     name: "Imposter Captcha",
     description: "A whack-the-imposter verification game: catch the imposters before the timer runs out, then watch the keys collapse into a verified reveal.",
     assets: true,
-    previewHeight: 600,
     isNew: true,
     propDocs: {
       target: "Imposters to catch.",
@@ -58,7 +56,6 @@ const ENTRIES: Entry[] = [
     name: "Memory Camera",
     description: "A retro camera that prints a stamp-cutout memory on every shutter tap, with a flash, recoil, cursor tilt and a scrapbook row.",
     assets: true,
-    previewHeight: 760,
     isNew: true,
     propDocs: {
       images: "Up to five image URLs. Without it, a set of flower placeholders is used.",
@@ -97,7 +94,6 @@ const ENTRIES: Entry[] = [
       ariaLabel: "Accessible name of the list.",
       onCheckedChange: "Called with the full list of checked ids.",
     },
-    previewHeight: 400,
     isNew: true,
     usage: `import { Checklist } from "@/components/ui/checklist";
 
@@ -123,7 +119,6 @@ const ENTRIES: Entry[] = [
       position: "Pin it to the top or the bottom of the screen.",
       className: "Extra classes for the fixed wrapper, for example to move it sideways.",
     },
-    previewHeight: 520,
     usage: `import { ProximityScrollIndicator } from "@/components/ui/proximity-scroll-indicator";
 
 <ProximityScrollIndicator
@@ -149,7 +144,6 @@ const ENTRIES: Entry[] = [
       onKeyActivate: "Called with the key label under the pointer or just typed, and null when the pointer leaves.",
       className: "Extra classes for the wrapper, for example to set the width.",
     },
-    previewHeight: 440,
     usage: `import { IsometricKeyboard } from "@/components/ui/isometric-keyboard";
 
 <IsometricKeyboard theme="light" onKeyActivate={(label) => console.log(label)} />`,
@@ -159,7 +153,6 @@ const ENTRIES: Entry[] = [
     category: "Data",
     name: "Dynamic Metrics Chart",
     description: "A sales and units chart with timeframe tabs, animated bars and a built-in empty state.",
-    previewHeight: 640,
     propDocs: {
       title: "Heading of the card.",
       frames: "One entry per tab: label, sales, units, salesChange, unitsChange, points (one bar each) and labels (x axis). Without it, demo data is shown.",
@@ -214,7 +207,6 @@ const frames: MetricsFrame[] = [
       onInvite: "Called before someone is added; reject to show an error.",
       onRemove: "Called with the id of a removed person.",
     },
-    previewHeight: 580,
     usage: `import { SharePanel } from "@/components/ui/share-panel";
 
 <SharePanel link="https://example.com/doc" onInvite={(person) => api.invite(person)} />`,
@@ -240,7 +232,6 @@ const frames: MetricsFrame[] = [
       onCheckedChange: "Called with the new value when the switch is clicked.",
       className: "Extra classes for the switch button.",
     },
-    previewHeight: 280,
     usage: `import { GrabToggle } from "@/components/ui/grab-toggle";
 
 <GrabToggle onCheckedChange={(on) => console.log(on)} />`,
@@ -251,9 +242,10 @@ export const COMPONENTS: ComponentEntry[] = ENTRIES.map((entry) => ({ ...entry, 
 
 export const NAV: NavItem[] = COMPONENTS.map(({ slug, name, description, category, isNew }) => ({ slug, name, description, category, isNew }));
 
-export const NAV_GROUPS = Object.entries(NAV.reduce<Record<string, NavItem[]>>((groups, item) => ({ ...groups, [item.category]: [...(groups[item.category] ?? []), item] }), {}));
+export type NavGroup = [string, NavItem[]];
+export const NAV_GROUPS: NavGroup[] = Object.entries(NAV.reduce<Record<string, NavItem[]>>((groups, item) => ({ ...groups, [item.category]: [...(groups[item.category] ?? []), item] }), {}));
 
-export const getComponent = (slug: string) => COMPONENTS.find((c) => c.slug === slug);
+const getComponent = (slug: string) => COMPONENTS.find((c) => c.slug === slug);
 
 export function requireComponent(slug: string) {
   const entry = getComponent(slug);

@@ -8,13 +8,9 @@
   --card: #f6f6f6;
   --hairline: color-mix(in srgb, var(--foreground) 5%, transparent);
   --topbar-h: 3.5rem;
-  /* Headline tracking. Figma: -9% on the SF Compact Regular headline (-0.09em). The Heavy Italic "touch twice" is cut a
-     little narrower than Figma's 275px at -9%, so it is opened to -0.075em to land on the same width. */
+  --footer-h: 7.8125rem;
   --display-tracking: -0.09em;
   --display-tracking-italic: -0.075em;
-  /* Corners. Figma uses iOS corner smoothing at 100%; <SquircleLayer> draws the exact shape.
-     --corner-smoothing: 1 = Figma 100%, 0.6 = iOS default, 0 = plain round.
-     --corner-shape is the CSS fallback for browsers/elements without the drawn shape. */
   --corner-smoothing: 1;
   --corner-shape: squircle;
   --radius-control: 8px;
@@ -22,8 +18,12 @@
   --radius-card: 24px;
 }
 
-/* Home hero, desktop only: the crowd keeps its size but sits lower, and the hero clips whatever drops below it.
-   --crowd-drop is how far down it moves, as a share of the crowd's own height. */
+@media (min-width: 64rem) {
+  :root {
+    --footer-h: 5.3125rem;
+  }
+}
+
 @media (min-width: 48rem) {
   .hero-clip {
     overflow: hidden;
@@ -33,31 +33,12 @@
   }
 }
 
-/* Home topbar: the stroke runs between the logo and the right-hand buttons (inside the bar padding). */
-.topbar-rule {
-  position: absolute;
-  inset-inline: 1rem;
-  bottom: 0;
-  height: 1px;
-  background: var(--hairline);
-}
-@media (min-width: 48rem) {
-  .topbar-rule {
-    inset-inline: 1.5rem;
-  }
-}
-
-/* When <SquircleLayer> is active it draws the background and border; hide the parent's own versions
-   (they stay as the fallback before the script runs). Layout is unchanged. */
 [data-squircle="layer"] {
   background-color: transparent !important;
   border-color: transparent !important;
   isolation: isolate;
 }
 
-/* Fonts from Figma, bundled as Latin-only WOFF2 in /public/fonts (see public/fonts/README.md): SF Compact Text
-   Regular (headline), SF Compact Text Heavy Italic ("touch twice") and Futura Bold Italic ("Offset MOTION"). Inter Tight
-   and Jost stay as fallbacks while they load. */
 @font-face {
   font-family: "SF Compact Brand";
   src: url("/fonts/SFCompactText-Regular.woff2") format("woff2");
@@ -80,12 +61,6 @@
   font-display: swap;
 }
 
-/* "touch twice" in the hero: a bright shine sweeps left to right across both words as one movement, then rests.
-   Painted on the letters only (background-clip: text), over the normal text colour. Three layers move together:
-   - the core: Figma's two slim slits of light (node 34:196: 6.52px wide, 2.14px apart, leaning 20.1deg, 85% white+),
-   - a soft halo around them, so the letters brighten gradually as the shine arrives and fade as it leaves,
-   - the text colour underneath (static).
-   Sizes are in em (Figma: 56px type), so they scale with the headline. */
 @keyframes light-sweep {
   0%,
   25% {
@@ -102,7 +77,6 @@
     padding-inline: 0.1em;
     margin-inline: -0.1em;
     background-image:
-      /* core: two slits */
       linear-gradient(
         110.1deg,
         transparent calc(50% - 0.1355em),
@@ -111,7 +85,6 @@
         rgb(255 255 255 / 0.92) calc(50% + 0.0191em) calc(50% + 0.1355em),
         transparent calc(50% + 0.1355em)
       ),
-      /* halo: a smooth, eased glow around the slits */
       linear-gradient(
         110.1deg,
         transparent calc(50% - 0.36em),
@@ -132,7 +105,6 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    /* ~1s to cross the phrase, then a short rest. */
     animation: light-sweep 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -151,20 +123,28 @@
   --color-hairline: color-mix(in srgb, var(--foreground) 5%, transparent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* Headline + "Offset MOTION" wordmark: the bundled SF Compact and Futura (see @font-face above), with Inter Tight and
-     Jost as fallbacks while they load. */
-  --font-display: "SF Compact Brand", var(--font-inter-tight), system-ui, sans-serif;
-  --font-futura: "Futura Brand", var(--font-jost), sans-serif;
+  --font-display: "SF Compact Brand", system-ui, sans-serif;
+  --font-futura: "Futura Brand", sans-serif;
 }
 
-/* CSS fallback for iOS-style corners. Pair with any `rounded-*` radius. Browsers without corner-shape support
-   keep the plain rounded corner. The exact Figma shape comes from <SquircleLayer>. */
 @utility smooth {
   corner-shape: var(--corner-shape, squircle);
 }
 
 @utility focus-ring {
   @apply outline-none focus-visible:ring-2 focus-visible:ring-stone-400;
+}
+
+@utility page-title {
+  @apply text-4xl font-normal tracking-[-0.07em] md:text-[42px];
+}
+
+@utility section-title {
+  @apply text-lg font-medium tracking-[-0.02em];
+}
+
+@utility eyebrow {
+  @apply font-mono text-xs uppercase tracking-[0.1em];
 }
 
 body {
@@ -201,5 +181,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card-in {
     animation: none !important;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    translate: -100% 0;
   }
 }

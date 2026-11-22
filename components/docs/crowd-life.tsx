@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 const BLINK_MS = 140;
 const CLOSED = 0.08;
-const BUBBLE_MS = 2000; // how long a bubble stays up
-const NEXT_MS = 120; // pause before the next peep speaks (plus up to NEXT_JITTER_MS)
+const BUBBLE_MS = 2000;
+const NEXT_MS = 120;
 const NEXT_JITTER_MS = 220;
 const EDGE = 118;
 const TOP_SAFE = 120;
@@ -83,7 +83,6 @@ export function CrowdLife() {
       const headY = r.top + r.height * 0.1;
       return headX > 16 && headX < innerWidth - 16 && headY > TOP_SAFE && headY < innerHeight - 16;
     };
-    // One chain: a bubble hides, then the next peep speaks right after. `say` ends by calling `chatter` again.
     function chatter(delay: number) {
       window.clearTimeout(auto);
       auto = window.setTimeout(() => {
@@ -95,7 +94,7 @@ export function CrowdLife() {
             return;
           }
         }
-        chatter(400); // nothing to say right now (busy, hovering or off screen): look again shortly
+        chatter(400);
       }, delay);
     }
     if (!reduce) chatter(500);

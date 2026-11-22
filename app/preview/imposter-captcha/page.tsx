@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function ImposterCaptchaDemo() {
   return (
     <main className={`${inter.className} flex min-h-screen items-center justify-center bg-[#f0f0f0] p-6`}>
-      <ImposterCaptcha scale={0.7} />
+      <ImposterCaptcha scale={0.65} />
     </main>
   );
 }

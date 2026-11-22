@@ -11,7 +11,7 @@ export function Crowd({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn("relative md:aspect-(--ratio) md:h-auto", className)} style={{ "--ratio": `${width}/${height}` } as CSSProperties}>
       <div className="absolute inset-0 overflow-hidden [container-type:size]">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2" style={stage}>
+        <div className="absolute left-1/2 top-0 -translate-x-1/2" style={stage}>
           {people.map((p, i) => {
             const { say } = p;
             return (

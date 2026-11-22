@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BackLink } from "@/components/docs/back-link";
 import { Footer } from "@/components/docs/footer";
 import { SmartLink } from "@/components/docs/smart-link";
 import { Topbar } from "@/components/docs/topbar";
@@ -22,38 +23,41 @@ export default async function InfoPage({ params }: PageProps<"/[page]">) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Topbar />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-        <h1 className="text-4xl font-semibold tracking-tight">{info.title}</h1>
-        <p className="mt-3 text-stone-600">{info.description}</p>
-        {info.updated && <p className="mt-1 text-sm text-stone-500">Last updated {info.updated}</p>}
-        <div className="mt-10 space-y-10">
-          {info.sections.map((section, i) => (
-            <section key={section.heading ?? i} className="space-y-3 leading-relaxed text-stone-700">
-              {section.heading && <h2 className="text-lg font-semibold text-foreground">{section.heading}</h2>}
-              {section.text?.map((text) => <p key={text}>{text}</p>)}
-              {section.code && <code className="block overflow-x-auto rounded-lg bg-black/[.05] px-4 py-3 font-mono text-sm text-foreground">{section.code}</code>}
-              {section.list && (
-                <ul className="list-disc space-y-1.5 pl-5">
-                  {section.list.map((item) => <li key={item}>{item}</li>)}
-                </ul>
-              )}
-              {section.links && (
-                <ul className="space-y-1.5">
-                  {section.links.map(([name, href]) => (
-                    <li key={name}>
-                      <SmartLink href={href} className="rounded-sm font-medium text-foreground underline underline-offset-4 focus-ring hover:text-stone-600">
-                        {name} ↗
-                      </SmartLink>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
+      <Topbar bordered />
+      <main className="mx-auto w-full max-w-[1335px] flex-1 px-4 py-10 md:px-6 md:py-14">
+        <div className="max-w-2xl">
+          <BackLink href="/">Back to Home</BackLink>
+          <h1 className="page-title mt-6">{info.title}</h1>
+          <p className="mt-1 text-base leading-[26px] text-muted">{info.description}</p>
+          {info.updated && <p className="mt-1 text-sm text-foreground/40">Last updated {info.updated}</p>}
+          <div className="mt-10 space-y-10">
+            {info.sections.map((section, i) => (
+              <section key={section.heading ?? i} className="space-y-3 text-[15px] leading-6 text-stone-600">
+                {section.heading && <h2 className="section-title text-foreground">{section.heading}</h2>}
+                {section.text?.map((text) => <p key={text}>{text}</p>)}
+                {section.code && <code className="block overflow-x-auto rounded-xl bg-card px-4 py-3 font-mono text-[13px] text-foreground">{section.code}</code>}
+                {section.list && (
+                  <ul className="list-disc space-y-1.5 pl-5">
+                    {section.list.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                )}
+                {section.links && (
+                  <ul className="space-y-1.5">
+                    {section.links.map(([name, href]) => (
+                      <li key={name}>
+                        <SmartLink href={href} className="rounded-sm font-medium text-foreground underline underline-offset-4 focus-ring hover:text-muted">
+                          {name} ↗
+                        </SmartLink>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ))}
+          </div>
         </div>
       </main>
-      <Footer className="mt-24" />
+      <Footer className="mt-16" />
     </div>
   );
 }

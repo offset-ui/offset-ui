@@ -8,6 +8,9 @@ import { componentPath } from "@/lib/routes";
 import { SquircleLayer } from "./squircle-layer";
 
 
+const SEARCH_EVENT = "offset:search";
+export const openSearch = () => window.dispatchEvent(new Event(SEARCH_EVENT));
+
 export function Search({ items }: { items: NavItem[] }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -26,8 +29,13 @@ export function Search({ items }: { items: NavItem[] }) {
         dialog.current?.showModal();
       }
     };
+    const open = () => dialog.current?.showModal();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener(SEARCH_EVENT, open);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(SEARCH_EVENT, open);
+    };
   }, []);
 
   const go = (slug: string) => {
@@ -40,13 +48,12 @@ export function Search({ items }: { items: NavItem[] }) {
       <button
         type="button"
         onClick={() => dialog.current?.showModal()}
-        className="smooth flex h-8 items-center gap-2 rounded-(--radius-control) bg-foreground/5 px-3 text-sm text-muted focus-ring transition-colors hover:bg-foreground/[.08] [--sq-fill:color-mix(in_srgb,var(--foreground)_5%,transparent)] hover:[--sq-fill:color-mix(in_srgb,var(--foreground)_8%,transparent)] sm:w-72"
+        className="smooth hidden h-8 w-72 items-center gap-2 rounded-(--radius-control) bg-foreground/5 px-3 text-sm text-muted focus-ring transition-colors hover:bg-foreground/[.08] [--sq-fill:color-mix(in_srgb,var(--foreground)_5%,transparent)] hover:[--sq-fill:color-mix(in_srgb,var(--foreground)_8%,transparent)] md:flex"
       >
         <SquircleLayer radius="--radius-control" fill="var(--sq-fill)" />
         <Image aria-hidden src="/icons/search.svg" alt="" width={16} height={16} className="shrink-0" />
-        <span className="hidden flex-1 text-left sm:block">Search components…</span>
-        <kbd className="hidden rounded bg-foreground/5 px-1.5 font-sans text-[11px] leading-[16.5px] text-foreground sm:block">Ctrl K</kbd>
-        <span className="sr-only sm:hidden">Search components</span>
+        <span className="flex-1 text-left">Search components…</span>
+        <kbd className="rounded bg-foreground/5 px-1.5 font-sans text-[11px] leading-[16.5px] text-foreground">Ctrl K</kbd>
       </button>
 
       <dialog
