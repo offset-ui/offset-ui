@@ -50,6 +50,6 @@
     "svgo": "^4.1.0",
     "svgpath": "^2.6.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^7"
   }
 }
