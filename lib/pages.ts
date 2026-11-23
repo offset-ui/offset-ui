@@ -1,134 +1,306 @@
-import { STAR_REFRESH_TEXT } from "@/lib/github";
-import { repoUrl, SITE, SOCIAL_LINKS } from "@/lib/site";
+import { repoUrl, SITE } from "@/lib/site";
 
-export type Section = { heading?: string; text?: string[]; list?: string[]; code?: string; links?: [string, string][] };
-export type InfoPage = { title: string; description: string; updated?: string; sections: Section[] };
-
-const UPDATED = "November 15, 2026";
+export type Section = { heading?: string; text?: string[]; list?: string[]; code?: string; links?: [string, string][]; closing?: string[] };
+export type InfoPage = { title: string; description?: string; updated?: string; sections: Section[] };
 
 export const PAGES: Record<string, InfoPage> = {
   about: {
     title: "About",
-    description: "Why Offset UI exists, and the open-source licence it ships under.",
+    description: "A little about the idea behind Offset UI, why I started building it, and what I'm trying to make along the way.",
     sections: [
       {
         heading: "Why Offset UI exists",
         text: [
-          "Most component libraries give you a button that works. We wanted components that feel like someone cared about the last few pixels: a checkbox that crosses itself out like a pen, a switch where a hand reaches in and drags the knob across.",
-          "Offset UI is a small, growing library of React components built pixel for pixel from Figma designs, with motion you will remember. Every component is one file you copy into your project and own. There is nothing to install, no theme to fight and no black box to debug.",
+          "I've always been drawn to the little details in design. The tiny interactions, the unexpected movements and those few pixels that somehow make an interface feel more alive.",
+          "Most component libraries give you things that work. And that's great. But I always felt there was room to make them feel a little more special.",
+          "That's where Offset UI started.",
+          "What began as an experiment turned into a growing collection of React components, each designed in Figma and brought to life with code, motion and a lot of attention to detail.",
+          "I'm building this one component at a time, trying to make things that are not only useful but genuinely enjoyable to use.",
+          "Every component comes with its own code, ready to copy, customise and make your own. No complicated setup or hidden layers. Just the things you need, without getting in your way.",
         ],
-      },
-      {
-        heading: "Why the name",
-        text: ["Look at the logo: a card with its twin nudged just out of line. Good interfaces do the same thing. They are the familiar pattern, shifted a few pixels to where it surprises you."],
       },
       {
         heading: "What makes it different",
         list: [
-          "Designed in Figma first, then built to match it exactly, not approximated.",
-          "Every component has a Copy for AI button, so your coding assistant gets the full prompt and code in one click.",
-          "Small on purpose: one file per component, a few well-chosen props and sensible defaults.",
-          "Accessible by default: keyboard support, visible focus, screen reader labels and respect for reduced motion.",
+          "**Designed in Figma, built with care.** Every component starts with a design. I work through the details in Figma before bringing them to code, making sure the final interaction feels as close to the original idea as possible.",
+          "**Made for the way we build today.** Each component comes with a Copy for AI option, giving your coding assistant the complete prompt and code to help bring it into your project.",
+          "**No unnecessary complexity.** One component, one file. A few thoughtful props, sensible defaults and code you can actually understand and make your own.",
+          "**The details matter, including accessibility.** Keyboard interactions, visible focus states, screen reader labels and reduced-motion support are considered throughout the process.",
         ],
       },
       {
         heading: "Open source",
         text: [
-          "The components are open source under the MIT licence. In plain words: you can use them in personal and commercial projects, change them, and ship them, as long as you keep the licence notice with the code you copy. You do not need to credit us in your product.",
-          "Code that has been released under MIT stays MIT. If we ever add something new on different terms, we will say so clearly and it will not change what you already have.",
-          "The licence covers the code. The Offset UI name, logo and the design of this website are not part of it.",
+          "I believe good ideas are better when they're shared.",
+          "That's why the component code in Offset UI is released under the MIT licence. You can use it in personal or commercial projects, modify it, build on it and ship it as part of your own work.",
+          "All I ask is that you retain the original licence notice alongside the code you use. No additional credit is required in your product.",
+          "The licence applies to the component code, not the Offset UI name, logo or website design.",
+          "And just to be clear, code that's already released under MIT stays under MIT, even if the project evolves or introduces things under different terms in the future.",
         ],
-        links: [["Read the full licence on GitHub", repoUrl("/blob/main/LICENSE")], ["View the source", SITE.github]],
+        links: [["Read the full licence on GitHub", repoUrl("/blob/main/LICENSE")], ["Explore the source code", SITE.github]],
       },
       {
         heading: "Built in public",
-        text: ["The code, the issues and the roadmap live on GitHub. If something is missing or broken, or you want a component, tell us there.", "The people in the home page illustration come from Open Peeps by Pablo Stanley, released into the public domain under CC0."],
-        links: [["Request a component", SITE.requestComponent]],
+        text: [
+          "Offset UI is something I'm actively building, experimenting with and learning from.",
+          "The code, issues and roadmap are all out there on GitHub. I'll keep adding components, refining existing ones and exploring new interactions as I go.",
+          "And I'd love for you to be part of that process.",
+          "Found something broken? Have an idea for a component? Think something could be done better? Feel free to open an issue or share your thoughts. I'm always happy to hear them.",
+        ],
+        links: [["Suggest a component", SITE.requestComponent]],
+      },
+      {
+        text: [
+          "One last little credit: the people featured in the homepage illustration are from [Open Peeps by Pablo Stanley](https://www.openpeeps.com/), released into the public domain under CC0.",
+          "Thanks for being here. I hope you find something you love building with.",
+        ],
       },
     ],
   },
   contact: {
     title: "Contact",
-    description: "How to reach us.",
+    description: "Have a question, spotted something that needs fixing, or just have an idea you'd like to share? Here's where to find me.",
     sections: [
       {
-        text: ["Offset UI is a small project, so replies can take a few days. We read everything."],
+        heading: "Let's talk",
+        text: [
+          "Offset UI is an independent project, built and maintained by me. That means I'm the one designing the components, working on the code, updating the website and keeping things moving.",
+          "So if you reach out, you're talking directly to the person behind it.",
+          "Whether it's a question about a component, feedback on something I've built or just an interesting idea, I'd love to hear from you.",
+          "A little context goes a long way, though. The more specific your message is, the easier it is for me to understand what you need and get back to you.",
+        ],
       },
       {
-        heading: "Bugs and questions",
-        text: ["Open an issue on GitHub. Say which component and browser you used, and what you expected to happen. A short screen recording helps a lot."],
-        links: [["Open an issue", repoUrl("/issues/new/choose")]],
+        heading: "Find me around the internet",
+        list: [
+          `Website: [Offset UI](${SITE.url})`,
+          `GitHub: [Explore the source](${SITE.github})`,
+          "Portfolio: My portfolio",
+          `Email: [${SITE.socials.email}](mailto:${SITE.socials.email})`,
+          `X / Twitter: [Say hello](${SITE.socials.x})`,
+        ],
+        closing: ["Feel free to reach out through any of these. For anything that needs a proper conversation, email is probably the easiest way to reach me."],
       },
       {
-        heading: "Ask for a component",
-        text: ["Tell us what you would like to see and where you would use it. Requests shape what we build next."],
-        links: [["Request a component", SITE.requestComponent]],
+        heading: "A little about my inbox",
+        text: [
+          "There's no support team or ticketing system behind Offset UI. It's just me managing things alongside everything else I'm working on.",
+          "I try to keep an eye on incoming messages and respond whenever I can. It might not always be immediate, but I do read them.",
+          "One small favour: please avoid sending vague messages or unsolicited promotional emails. A little context about why you're reaching out makes a big difference.",
+        ],
       },
       {
-        heading: "Security problems",
-        text: ["Please do not post these publicly. Report them privately through GitHub and we will reply within 7 days."],
-        links: [["Report privately", repoUrl("/security/advisories/new")]],
+        heading: "Found something broken?",
+        text: [
+          "If you've spotted a bug, a visual inconsistency or something that doesn't quite behave as expected, GitHub is the best place to report it.",
+          `[Browse existing issues ↗](${repoUrl("/issues")}) or [open a new issue ↗](${repoUrl("/issues/new")}).`,
+          "When reporting something, try to include:",
+        ],
+        list: [
+          "What you were doing when the issue appeared.",
+          "What happened versus what you expected.",
+          "The component name or relevant page.",
+          "Your browser or environment, if relevant.",
+          "A screenshot or recording, if possible.",
+        ],
+        closing: ["This helps me understand the problem without having to guess what went wrong."],
       },
-      ...(SOCIAL_LINKS.length ? [{ heading: "Elsewhere", links: SOCIAL_LINKS }] : []),
-    ],
-  },
-  faq: {
-    title: "FAQ",
-    description: "Quick answers about Offset UI.",
-    sections: [
-      { heading: "Is Offset UI free?", text: ["Yes. The components are free to use under the MIT licence. Code released under MIT stays MIT."] },
-      { heading: "Can I use it in client or commercial work?", text: ["Yes. Use it in personal, client and commercial projects. Keep the licence notice with the code you copy. You do not need to credit us in your product."] },
-      { heading: "How do I add a component?", text: ["Open its page, copy the file into your project, and install the small packages once.", "Then import it and use it. Each page shows the exact steps."], code: SITE.install },
-      { heading: "Does it need Tailwind CSS?", text: ["The components are styled with Tailwind CSS v4 classes, so your project needs Tailwind. They also use the motion, clsx and tailwind-merge packages."] },
-      { heading: "Which frameworks does it work with?", text: ["Any React project, such as Next.js or Vite. We build and test on React 19."] },
-      { heading: "What is Copy for AI?", text: ["A button on every component page that copies a ready-made prompt with the full code, so Cursor, Claude or ChatGPT can add the component to your project for you."] },
-      { heading: "Is it accessible?", text: ["That is the goal for every component: keyboard support, visible focus, labels for screen readers and respect for reduced motion. If you find a gap, please open an issue."] },
-      { heading: "Can I change how a component looks?", text: ["Yes. Each component has a few props, usually colours, size and labels. And because the file is yours, you can change anything else directly."] },
-      { heading: "How do I ask for a new component?", text: ["Send a request on GitHub. We read every one."], links: [["Request a component", SITE.requestComponent]] },
-      { heading: "Will it stay free?", text: ["What has been released under MIT stays MIT. We may add new things later, and if they come on different terms we will say so clearly."] },
+      {
+        heading: "Have an idea?",
+        text: [
+          "Some of my favourite things to build start with a simple idea.",
+          "Maybe there's a component you'd love to see in Offset UI, an interaction you've come across, or a small detail you think could be done better.",
+          "I'm always open to suggestions. You don't need a perfectly written proposal or a detailed specification. Just tell me what you have in mind and why you think it would be useful.",
+        ],
+        links: [["Suggest a component on GitHub", SITE.requestComponent]],
+        closing: ["You can also email me if you'd rather talk through an idea first."],
+      },
+      {
+        heading: "Just saying hello?",
+        text: [
+          "That's welcome too.",
+          "Not every message needs to be about a bug or a feature request. If you've been using Offset UI, found something interesting or simply want to say hi, my inbox is open.",
+          "Have something in mind? I'd love to hear it.",
+        ],
+        links: [["Get in touch", `mailto:${SITE.socials.email}`]],
+      },
+      {
+        heading: "Related",
+        text: ["Want to know a little more about the project? Head over to [About Offset UI](/about) to read why I started building it, how the components come together and what the project is all about.", "You can also explore the [component library](/components) or browse the [source code on GitHub](" + SITE.github + ")."],
+      },
     ],
   },
   terms: {
-    title: "Terms",
-    description: "The simple rules for using this site and its code.",
-    updated: UPDATED,
+    title: "Terms of Use",
+    updated: "November 2026",
     sections: [
-      { text: ["These terms are short on purpose. By using this website or the code on it, you agree to them."] },
-      { heading: "Using the site", text: ["You can browse the site and copy the code without an account or any payment."] },
       {
-        heading: "The code",
-        text: ["The components are released under the MIT licence. You can use, copy, change and share them, including in commercial work, as long as you keep the licence notice with the code you copy.", "The code is provided as it is, with no warranty of any kind. Please test it in your own project before you rely on it. To the extent the law allows, we are not responsible for any loss that comes from using the site or the code."],
-        links: [["Read the licence", repoUrl("/blob/main/LICENSE")]],
+        heading: "1. Overview",
+        text: [
+          `These Terms govern your use of Offset UI ([${SITE.url.replace("https://", "")}](${SITE.url})), including its website, component library and related resources.`,
+          "Offset UI is an independent project built and maintained by me. By accessing or using the website, you agree to these Terms. If you don't agree with them, please stop using the website.",
+          "These Terms are here to keep things clear about how the project can be used, what you can expect from it and what responsibilities come with using the components.",
+        ],
       },
-      { heading: "What is not covered by the licence", text: ["The Offset UI name, logo and the design of this website belong to us. Please do not use them in a way that suggests we made or approved your product. The sample content in component previews is for demonstration only."] },
-      { heading: "Contributions", text: ["If you send code or artwork to the repository, only send work you have the right to share under the MIT licence."] },
-      { heading: "Other people's code and sites", text: ["The components use open-source packages, each with its own licence. When you follow a link to another site, such as GitHub, that site's own terms apply."] },
-      { heading: "Changes", text: ["The site and the components may change or be removed over time. We may update these terms too, and the date at the top will change when we do."] },
-      { heading: "Questions", text: ["Reach us on the Contact page."] },
+      {
+        heading: "2. The website and components",
+        text: [
+          "Offset UI provides a collection of React components, design references and related resources intended to help developers and designers build better interfaces.",
+          `The component code is released under the [MIT License](${repoUrl("/blob/main/LICENSE")}), unless a particular file or resource states otherwise.`,
+          "You're free to copy, modify, adapt and use the components in personal and commercial projects, subject to the terms of the applicable licence.",
+          "Once you copy a component into your project, you're responsible for how you modify, implement and use it.",
+        ],
+      },
+      {
+        heading: "3. Using the website",
+        text: ["You're welcome to explore the website, browse components, copy code and use the resources available here.", "While using Offset UI, you agree not to:"],
+        list: [
+          "Use the website for unlawful activities or purposes.",
+          "Attempt to disrupt, damage or gain unauthorised access to the website or its infrastructure.",
+          "Introduce malicious code, scripts or harmful content.",
+          "Scrape, overload or abuse the website in ways that affect its availability for others.",
+          "Misrepresent Offset UI or suggest an official association or endorsement where none exists.",
+        ],
+        closing: ["I reserve the right to restrict access if someone uses the website in a way that could harm the project, its visitors or its infrastructure."],
+      },
+      {
+        heading: "4. Open-source licence",
+        text: [
+          "The component code available through Offset UI is licensed under MIT.",
+          "This means you can use it in personal and commercial projects, modify it, distribute it and include it in your own products, provided you follow the licence conditions.",
+          "You must retain the original copyright and licence notices in copies or substantial portions of the licensed code.",
+          "The MIT licence applies to the code, not automatically to everything associated with Offset UI.",
+          "The Offset UI name, logo, website design, branding and other original visual assets are not included in the MIT licence unless explicitly stated otherwise.",
+          `For the complete terms, please read the [MIT License on GitHub](${repoUrl("/blob/main/LICENSE")}).`,
+        ],
+      },
+      {
+        heading: "5. Intellectual property",
+        text: [
+          "The original branding, logo, website design, written content and visual identity of Offset UI belong to their respective owners.",
+          "You're welcome to reference the project and share links to its components, but you may not present the Offset UI brand, website or original visual assets as your own.",
+          "Some illustrations, fonts or other resources may belong to their respective creators and may have separate licensing conditions. Their use is subject to those individual licences.",
+        ],
+      },
+      {
+        heading: "6. Third-party services and links",
+        text: [
+          "Offset UI may contain links to external websites, repositories or services, including GitHub and Vercel.",
+          "These websites and services are not controlled by me. I'm not responsible for their content, availability, privacy practices or terms of use.",
+          "If you choose to visit or use an external service, its own terms and policies will apply.",
+        ],
+      },
+      {
+        heading: "7. Availability and updates",
+        text: [
+          "I do my best to keep Offset UI running smoothly and its components working as intended, but I can't promise that the website will always be available or that every component will work perfectly in every environment.",
+          "The project is continuously evolving. Components, documentation, features and website content may be updated, changed or removed as development continues.",
+          "I may also introduce new features or services in the future, which may come with additional terms where necessary.",
+        ],
+      },
+      {
+        heading: "8. Disclaimer",
+        text: [
+          `Offset UI and its components are provided on an "as is" and "as available" basis, without warranties of any kind, express or implied.`,
+          "I don't guarantee that:",
+        ],
+        list: [
+          "Every component will be free of bugs or errors.",
+          "Components will work with every framework, library or development setup.",
+          "The website will always be available without interruptions.",
+          "Using a component will produce a particular result in your project.",
+        ],
+        closing: ["You're responsible for testing and reviewing any code before using it in your application or production environment."],
+      },
+      {
+        heading: "9. Limitation of liability",
+        text: [
+          "To the fullest extent permitted by applicable law, Offset UI and its maintainer will not be held responsible for indirect, incidental or consequential damages, loss of data, lost profits or other issues arising from the use of the website or its components.",
+          "This includes issues resulting from modifying, implementing or integrating copied components into your own projects.",
+          "Nothing in these Terms excludes liability where applicable law does not allow such an exclusion.",
+        ],
+      },
+      {
+        heading: "10. Changes to these Terms",
+        text: [
+          "As Offset UI grows, these Terms may need to change to reflect new features, services or changes to how the project works.",
+          "Whenever meaningful changes are made, I'll update the date at the top of this page.",
+          "Your continued use of the website after updated Terms are published means you accept the revised Terms, to the extent permitted by applicable law.",
+        ],
+      },
+      {
+        heading: "11. Contact",
+        text: [
+          "Have a question about these Terms, the MIT licence or how something works?",
+          "Feel free to reach out through the [Contact page](/contact).",
+          "I'll be happy to help clarify things.",
+          "You can also read the [Privacy Policy](/privacy) to understand how information is handled when you use Offset UI.",
+          "These Terms are intended to provide general information about using Offset UI. They are not personalised legal advice. If you need advice about your specific legal obligations, please consult a qualified lawyer.",
+        ],
+      },
     ],
   },
   privacy: {
-    title: "Privacy",
-    description: "What this site collects, in plain words.",
-    updated: UPDATED,
+    title: "Privacy Policy",
+    updated: "November 2026",
     sections: [
-      { text: ["The short version: Offset UI does not ask you to sign up, does not run analytics or ads, and does not set cookies."] },
       {
-        heading: "What we collect",
-        text: ["We do not collect personal information from you ourselves. The site is hosted on Vercel, which, like any web host, keeps standard server logs, such as your IP address, browser type and the page you asked for. That is part of running a website securely. We do not use these logs to identify or follow you."],
-      },
-      {
-        heading: "What happens in your browser",
-        list: [
-          "Copy buttons copy to your clipboard. Nothing is sent anywhere.",
-          "Component previews run in your browser. Anything you type into them stays there.",
-          "Fonts are served from this site, not requested from other companies when you visit.",
-          `The GitHub star count is fetched by our server ${STAR_REFRESH_TEXT}, so your browser does not contact GitHub for it.`,
+        heading: "Overview",
+        text: [
+          `Offset UI ([${SITE.url.replace("https://", "")}](${SITE.url})) is an independent project featuring a growing collection of React components.`,
+          "I believe in keeping things simple, including how user data is handled. This website does not intentionally collect personal information just for browsing or exploring the component library, and I do not sell or rent personal data to anyone.",
         ],
       },
-      { heading: "Links to other sites", text: ["When you click through to GitHub or another site, that site's own privacy policy applies."] },
-      { heading: "Your data", text: ["Since we do not keep personal information about you, there is very little to access or delete. If you have a question or concern, tell us on the Contact page."] },
-      { heading: "Changes", text: ["If we change how the site works, we will update this page and the date at the top."] },
+      {
+        heading: "Analytics and tracking",
+        text: [
+          "I currently do not use third-party analytics or advertising trackers to monitor your activity across the website.",
+          "I also do not use analytics cookies to build user profiles or track your browsing behaviour.",
+          "If this changes in the future, I'll update this page to explain what is being used and how it handles your information.",
+        ],
+      },
+      {
+        heading: "Contact",
+        text: [
+          "If you reach out to me through email or another contact channel, I'll use the information you share only to understand and respond to your message.",
+          "I don't add people to marketing lists or send promotional emails without their consent.",
+          "Please keep in mind that email communication passes through third-party email providers, which may process your information under their own privacy policies.",
+          "For questions about privacy or how your information is handled, you can reach me through the [Contact page](/contact).",
+          "**Maintainer:** Offset UI",
+          `**Email:** [${SITE.socials.email}](mailto:${SITE.socials.email})`,
+        ],
+      },
+      {
+        heading: "Third-party hosting",
+        text: [
+          "Offset UI is hosted on [Vercel](https://vercel.com/), which handles the infrastructure needed to make the website accessible.",
+          "Like most hosting providers, Vercel may process certain technical information, such as IP addresses, browser details, requested URLs and server logs, to deliver, maintain and secure the website.",
+          "This information is handled by Vercel under its own privacy policy. You can learn more about how it processes data in the [Vercel Privacy Policy](https://vercel.com/legal/privacy-policy).",
+        ],
+      },
+      {
+        heading: "Open source components",
+        text: [
+          "The components available on Offset UI are designed to be copied and used in your own projects.",
+          "Once you copy a component into your application, it runs within your own environment. Any data collection, cookies, tracking or other privacy practices associated with your application are your responsibility.",
+          "Offset UI does not control how copied components are used after they become part of another project.",
+        ],
+      },
+      {
+        heading: "Children's privacy",
+        text: ["Offset UI is not specifically directed at children, and I do not knowingly collect personal information from children through this website."],
+      },
+      {
+        heading: "Changes to this policy",
+        text: [
+          "This policy may change as Offset UI grows and new features or services are introduced.",
+          "Whenever I make meaningful changes, I'll update the date at the top of this page. I encourage you to check back occasionally to stay informed about how the website handles information.",
+        ],
+      },
+      {
+        heading: "Questions?",
+        text: ["If something here isn't clear or you have a question about privacy, feel free to [get in touch](/contact).", "I'm happy to clarify."],
+      },
     ],
   },
 };

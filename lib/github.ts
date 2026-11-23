@@ -1,7 +1,6 @@
 import { SITE } from "@/lib/site";
 
 const STAR_REVALIDATE_SECONDS = 3600;
-export const STAR_REFRESH_TEXT = "about once an hour";
 
 export async function getStarCount(): Promise<number | null> {
   try {

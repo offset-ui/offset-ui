@@ -15,6 +15,7 @@ Before opening a pull request, run `npm run typecheck`, `npm run lint` and `npm 
 
 - One component per file: `components/ui/<kebab-name>.tsx`. Add `"use client"` only if it uses state, effects, refs or events.
 - All text, colours, sizes and speeds come from props, each with a sensible default, so the component works with no props. Accept `className` and merge it with `cn()`.
+- Start the file with the two-line MIT notice (`SPDX-License-Identifier` and the copyright line). Copy it from any existing component, above `"use client"`.
 - Export the prop types.
 - Keyboard accessible, visible focus ring, semantic HTML, and respect `prefers-reduced-motion`. Check text contrast against WCAG AA.
 - Dependencies stay at `motion`, `clsx` and `tailwind-merge`. Open an issue before adding another.

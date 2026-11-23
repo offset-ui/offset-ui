@@ -83,6 +83,15 @@ Modern evergreen browsers. The squircle corner shape (`corner-shape`) falls back
 
 ## Licence and assets
 
-Code is released under the [MIT licence](LICENSE). The sample portraits in `public/memory-camera` are AI-generated demo images. Replace them with your own before shipping. Fonts (Inter, Noto Color Emoji, Geist) are open-licensed through Google Fonts.
+The component code is released under the [MIT licence](LICENSE). Every file in `components/ui` starts with a short licence notice. Keep it when you copy a file into your project.
+
+Not covered by the MIT licence: the Offset UI name, the logo and brand files in `public/brand`, and the visual design and written content of the documentation website. See [BRAND.md](BRAND.md).
+
+Third-party material:
+
+- The people in the home page illustration are from [Open Peeps by Pablo Stanley](https://www.openpeeps.com/), released under CC0.
+- The sample portraits in `public/memory-camera` are AI-generated demo images. Replace them with your own before shipping.
+- Inter, Noto Color Emoji and Geist are open-licensed through Google Fonts.
+- The headline fonts in `public/fonts` (SF Compact and Futura) belong to their respective owners and are not part of the MIT licence. See `public/fonts/README.md`.
 
 If Offset UI saves you time, a star on GitHub helps us ship the next component sooner.
