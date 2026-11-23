@@ -23,6 +23,7 @@ Every component is a single file with typed props, sensible defaults, keyboard a
 
 | Component | What it does |
 | --- | --- |
+| Hanging Profile Cards | Profile cards on a real physics rope that you can drag and swing |
 | Imposter Captcha | A whack-the-imposter verification game with a collapsing-keys reveal |
 | Memory Camera | A retro camera that prints stamp-cutout memories, with cursor tilt |
 | Checklist | A hand-drawn check-off list with a drawn tick and a particle dissolve |
@@ -36,7 +37,7 @@ Live previews and code for each one are on the docs site (this repo): run it loc
 
 ## Use a component in your project
 
-1. Install the dependencies (once per project): `npm install motion clsx tailwind-merge`. Requires React 19 and Tailwind CSS v4.
+1. Install the dependencies (once per project): `npm install motion clsx tailwind-merge`. Requires React 19 and Tailwind CSS v4. A component that needs another package lists it on its page.
 2. Add the `cn` helper from [`lib/utils.ts`](lib/utils.ts).
 3. Copy the component file from [`components/ui`](components/ui) into your project. If the docs page for it lists an artwork folder, copy that folder from [`public`](public) too.
 4. Import it and use it. Every prop is optional.

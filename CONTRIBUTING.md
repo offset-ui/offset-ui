@@ -19,7 +19,7 @@ Before opening a pull request, run `npm run typecheck`, `npm run lint` and `npm 
 - Export the prop types.
 - Keyboard accessible, visible focus ring, semantic HTML, and respect `prefers-reduced-motion`. Check text contrast against WCAG AA.
 - Dependencies stay at `motion`, `clsx` and `tailwind-merge`. Open an issue before adding another.
-- Add a demo page at `app/preview/<kebab-name>/page.tsx` and an entry in `lib/registry.ts` with a short usage example and a one-line `propDocs` description for every prop. The build fails if `propDocs` names a prop that does not exist.
+- Add a demo page at `app/preview/<kebab-name>/page.tsx` and an entry at the top of `ENTRIES` in `lib/registry.ts` (the site lists components in that order, newest first) with a short usage example and a one-line `propDocs` description for every prop. The build fails if `propDocs` names a prop that does not exist.
 - Artwork goes in `public/<kebab-name>/`. Only submit images you have the right to share under the MIT licence.
 
 ## Keeping the code untangled

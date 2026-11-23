@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 
-const base = process.argv[2] ?? "http://localhost:3000";
+const [base = "http://localhost:3000", only] = process.argv.slice(2);
 const SIZE = { width: 704, height: 440 };
 const DEVICE_SCALE = 2;
 const WINDOW = "900,800";
@@ -28,7 +28,7 @@ const root = path.join(import.meta.dirname, "..");
 const out = path.join(root, "public/thumbnails");
 mkdirSync(out, { recursive: true });
 
-for (const file of readdirSync(path.join(root, "components/ui")).filter((name) => name.endsWith(".tsx"))) {
+for (const file of readdirSync(path.join(root, "components/ui")).filter((name) => name.endsWith(".tsx") && (!only || name === `${only}.tsx`))) {
   const slug = file.replace(".tsx", "");
   const shot = path.join(tmpdir(), `${slug}.png`);
   rmSync(shot, { force: true });

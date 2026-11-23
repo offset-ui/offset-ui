@@ -38,7 +38,7 @@ function Step({ n, id, title, children }: { n: number; id?: string; title: strin
 
 export default async function ComponentPage({ params }: PageProps<"/components/[slug]">) {
   const entry = requireComponent((await params).slug);
-  const { requirements, source, utils, assets, notes } = describeSetup(entry);
+  const { requirements, install, source, utils, assets, notes } = describeSetup(entry);
 
   const index = COMPONENTS.findIndex((c) => c.slug === entry.slug);
   const neighbours = [
@@ -91,7 +91,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           </div>
           <ol className="space-y-8">
             <Step n={1} title="Install the dependencies">
-              <CodeBlock code={SITE.install} title="terminal" lang="bash" />
+              <CodeBlock code={install} title="terminal" lang="bash" />
             </Step>
             <Step n={2} id="install-utils" title="Add the cn helper">
               <CodeBlock code={utils} title="lib/utils.ts" />

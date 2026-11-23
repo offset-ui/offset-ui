@@ -14,6 +14,7 @@ type PreviewFrameProps = {
 
 const TABS = ["Preview", "Code"] as const;
 const DESIGN_HEIGHT = 560;
+const ACTION = "smooth flex items-center gap-[5px] rounded-md px-2.5 py-1 text-xs font-medium text-muted focus-ring transition-colors hover:bg-black/5";
 const WINDOW = "h-[420px] w-full md:h-[clamp(400px,calc(100svh-484px),560px)]";
 
 export function PreviewFrame({ slug, title, children }: PreviewFrameProps) {
@@ -46,14 +47,16 @@ export function PreviewFrame({ slug, title, children }: PreviewFrameProps) {
           </button>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => setRun((n) => n + 1)}
-        className={cn("smooth flex items-center gap-[5px] rounded-md px-2.5 py-1 text-xs font-medium text-muted focus-ring transition-colors hover:bg-black/5", tab === "Code" && "invisible")}
-      >
-        <Image aria-hidden src="/icons/reload.svg" alt="" width={14} height={14} />
-        Replay
-      </button>
+      <div className={cn("flex items-center", tab === "Code" && "invisible")}>
+        <button type="button" onClick={() => setRun((n) => n + 1)} className={ACTION}>
+          <Image aria-hidden src="/icons/reload.svg" alt="" width={14} height={14} />
+          Replay
+        </button>
+        <a href={previewPath(slug)} target="_blank" rel="noreferrer" className={ACTION}>
+          <Image aria-hidden src="/icons/open.svg" alt="" width={14} height={14} />
+          Open
+        </a>
+      </div>
     </>
   );
   return (

@@ -10,6 +10,7 @@ export type ComponentEntry = {
   isNew?: boolean;
   usage: string;
   notes?: string[];
+  dependencies?: string[];
   propDocs?: Record<string, string>;
 };
 
@@ -17,6 +18,33 @@ type Entry = Omit<ComponentEntry, "file" | "assets"> & { assets?: true };
 export type NavItem = Pick<ComponentEntry, "slug" | "name" | "description" | "category" | "isNew">;
 
 const ENTRIES: Entry[] = [
+  {
+    slug: "hanging-profile-cards",
+    category: "Playful",
+    name: "Hanging Profile Cards",
+    description: "Profile cards hanging from a real physics rope. Drag one and the rope bends, the neighbours sway, and it swings back to rest.",
+    isNew: true,
+    dependencies: ["matter-js"],
+    propDocs: {
+      cards: "Up to six profiles, each with a name, a role and optionally an image URL, a tag and a profile link.",
+      colors: "Card and rope colours; the text colour is picked to stay readable.",
+      surface: "Card background.",
+      rope: "Colour of the rope, the strings and the hooks.",
+      swing: "How loose the cards feel, from 0 (heavy, settles fast) to 1 (swings freely).",
+      ariaLabel: "Accessible name of the group.",
+      className: "Extra classes for the outer wrapper, for example to set a maximum width.",
+    },
+    usage: `import { HangingProfileCards } from "@/components/ui/hanging-profile-cards";
+
+<HangingProfileCards
+  cards={[
+    { name: "Maya Bennett", role: "Creative Director", image: "/people/maya.jpg", href: "/team/maya" },
+    { name: "Leo Carter", role: "Motion Designer", image: "/people/leo.jpg" },
+  ]}
+  swing={0.5}
+/>`,
+    notes: ["Needs the matter-js physics engine. TypeScript projects also need npm install -D @types/matter-js.", "Without an image, each card shows a simple generated portrait."],
+  },
   {
     slug: "imposter-captcha",
     category: "Forms & Inputs",

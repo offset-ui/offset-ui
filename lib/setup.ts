@@ -7,7 +7,7 @@ const LICENCE_NOTE = "Keep the MIT licence notice at the top of the file when yo
 export function describeSetup(entry: ComponentEntry) {
   return {
     requirements: "React 19 and Tailwind CSS v4",
-    install: SITE.install,
+    install: [SITE.install, ...(entry.dependencies ?? [])].join(" "),
     utils: readSource("lib/utils.ts"),
     source: readSource(entry.file),
     assets: entry.assets,
