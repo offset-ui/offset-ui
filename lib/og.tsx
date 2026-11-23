@@ -5,6 +5,9 @@ import { readSource } from "@/lib/source";
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_TEXT = { primary: "#fafaf9", muted: "#d6d3d1", subtle: "#a8a29e" };
 
+const LOGO_RATIO = 89 / 23;
+export const logoSize = (width: number) => ({ width, height: Math.round(width / LOGO_RATIO) });
+
 export const logoDataUri = () => svgDataUri(readSource("public/brand/logo-complete-dark.svg"));
 
 type OgImageProps = { src: string; width: number; height: number; style?: CSSProperties };

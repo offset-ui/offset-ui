@@ -17,8 +17,9 @@ export async function Topbar({ motion = true, bordered = false }: { motion?: boo
     <header className={cn("sticky top-0 z-30 h-(--topbar-h) bg-background/85 backdrop-blur", bordered && "border-b border-foreground/[.08]")}>
       <div className="relative mx-auto flex h-full max-w-[1335px] items-center justify-between gap-3 px-4 md:grid md:grid-cols-[1fr_auto_1fr] md:px-6">
         <div className="flex items-center gap-6">
-          <Link href="/" aria-label={SITE.name} className="rounded-md focus-ring">
-            <Image src="/brand/logo-complete-light.svg" alt="" width={89} height={23} priority />
+          <Link href="/" aria-label={SITE.name} className="flex items-center gap-2 rounded-md focus-ring">
+            <Image src="/brand/logo-mark.svg" alt="" width={20} height={20} priority />
+            <span aria-hidden className="text-lg font-[450] tracking-[-0.08em]">OffsetUI</span>
           </Link>
           <p className="hidden text-sm text-muted lg:block">
             Created by{" "}
