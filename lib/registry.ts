@@ -22,14 +22,15 @@ const ENTRIES: Entry[] = [
     slug: "hanging-profile-cards",
     category: "Playful",
     name: "Hanging Profile Cards",
-    description: "Profile cards hanging from a real physics rope. Drag one and the rope bends, the neighbours sway, and it swings back to rest.",
+    description: "Profile cards hanging from a real physics rope. Brush a card and it sways, tilts towards your cursor and catches a holographic sheen. Drag one and the rope bends, the neighbours sway, and it swings back to rest.",
     isNew: true,
     dependencies: ["matter-js"],
     propDocs: {
-      cards: "Up to six profiles, each with a name, a role and optionally an image URL, a tag and a profile link.",
+      cards: "Up to six profiles, each with a name, a role and optionally an image URL and a profile link.",
       colors: "Card and rope colours; the text colour is picked to stay readable.",
-      surface: "Card background.",
-      rope: "Colour of the rope, the strings and the hooks.",
+      surface: "Card background, also the clip, the slot and the hook.",
+      rope: "Colour of the rope.",
+      tilt: "How far a card turns towards the pointer, from 0 (flat) to 1 (strong 3D tilt). The holographic sheen follows the same pointer.",
       swing: "How loose the cards feel, from 0 (heavy, settles fast) to 1 (swings freely).",
       ariaLabel: "Accessible name of the group.",
       className: "Extra classes for the outer wrapper, for example to set a maximum width.",
@@ -42,6 +43,7 @@ const ENTRIES: Entry[] = [
     { name: "Leo Carter", role: "Motion Designer", image: "/people/leo.jpg" },
   ]}
   swing={0.5}
+  tilt={0.5}
 />`,
     notes: ["Needs the matter-js physics engine. TypeScript projects also need npm install -D @types/matter-js.", "Without an image, each card shows a simple generated portrait."],
   },
